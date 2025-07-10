@@ -23,7 +23,7 @@ export default function ViewAllUsers() {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('/api/users', {
+      const res = await fetch(`${process.env.REACT_APP_API_URL || ''}/api/users`, {
         headers: { 'Authorization': `Bearer ${token}` },
       });
       const data = await res.json();

@@ -45,7 +45,7 @@ export default function AddUserForm({ onUserAdded }) {
         profilePicUrl = await uploadToCloudinary(profilePic);
       }
       const token = localStorage.getItem('token');
-      const res = await fetch('/api/users', {
+      const res = await fetch(`${process.env.REACT_APP_API_URL || ''}/api/users`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

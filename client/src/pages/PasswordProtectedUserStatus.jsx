@@ -36,7 +36,7 @@ export default function PasswordProtectedUserStatus() {
       const userData = await userRes.json();
 
       // Then authenticate with password
-      const authRes = await fetch('/api/auth/user-login', {
+              const authRes = await fetch(`${process.env.REACT_APP_API_URL || ''}/api/auth/user-login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -51,7 +51,7 @@ export default function PasswordProtectedUserStatus() {
       }
 
       // Get leaderboard
-      const leaderboardRes = await fetch('/api/users/public/leaderboard');
+              const leaderboardRes = await fetch(`${process.env.REACT_APP_API_URL || ''}/api/users/public/leaderboard`);
       const leaderboardData = await leaderboardRes.json();
 
       setUser(userData);

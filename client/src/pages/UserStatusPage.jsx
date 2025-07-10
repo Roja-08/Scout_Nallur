@@ -35,7 +35,7 @@ export default function UserStatusPage() {
         setUser(userData);
 
         // Fetch all users for leaderboard
-        const leadersRes = await fetch('/api/users/public/leaderboard');
+        const leadersRes = await fetch(`${process.env.REACT_APP_API_URL || ''}/api/users/public/leaderboard`);
         if (leadersRes.ok) {
           const leadersData = await leadersRes.json();
           setTopLeaders(leadersData.slice(0, 3));
