@@ -29,7 +29,7 @@ export default function UserStatusPage() {
       setError('');
       try {
         // Fetch user data
-        const userRes = await fetch(`/api/users/public/${userId}`);
+        const userRes = await fetch(`${process.env.REACT_APP_API_URL || ''}/api/users/public/${userId}`);
         if (!userRes.ok) throw new Error('User not found');
         const userData = await userRes.json();
         setUser(userData);

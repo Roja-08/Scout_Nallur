@@ -27,7 +27,7 @@ export default function PasswordProtectedUserStatus() {
     setLoading(true);
     try {
       // First, get user info
-      const userRes = await fetch(`/api/users/public/${userId}`);
+      const userRes = await fetch(`${process.env.REACT_APP_API_URL || ''}/api/users/public/${userId}`);
       if (!userRes.ok) {
         message.error('User not found');
         setLoading(false);
