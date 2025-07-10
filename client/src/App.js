@@ -33,11 +33,9 @@ function SuperAdminDashboard() {
   const email = localStorage.getItem('adminEmail') || 'Super Admin';
   const navigate = useNavigate();
   const [users, setUsers] = React.useState([]);
-  const [loading, setLoading] = React.useState(false);
 
   React.useEffect(() => {
     async function fetchUsers() {
-      setLoading(true);
       try {
         const token = localStorage.getItem('token');
         const res = await fetch('/api/users', {
@@ -46,7 +44,6 @@ function SuperAdminDashboard() {
         const data = await res.json();
         if (res.ok) setUsers(data);
       } catch {}
-      setLoading(false);
     }
     fetchUsers();
   }, []);
@@ -141,17 +138,17 @@ function SuperAdminDashboard() {
           <Row gutter={[24, 24]}>
             <Col xs={24} md={8}>
               <Card bordered={false} style={{ borderRadius: 12 }}>
-                <Statistic title="Total Users" value={users.length} loading={loading} />
+                <Statistic title="Total Users" value={users.length} />
               </Card>
             </Col>
             <Col xs={24} md={8}>
               <Card bordered={false} style={{ borderRadius: 12 }}>
-                <Statistic title="Total Duty Time" value={formatDutyTime(totalDutyTime)} loading={loading} />
+                <Statistic title="Total Duty Time" value={formatDutyTime(totalDutyTime)} />
               </Card>
             </Col>
             <Col xs={24} md={8}>
               <Card bordered={false} style={{ borderRadius: 12 }}>
-                <Statistic title="Active Users" value={users.filter(u => u.attendance && u.attendance.some(a => a.date === dayjs().format('YYYY-MM-DD') && a.comingTime && !a.finishingTime)).length} loading={loading} />
+                <Statistic title="Active Users" value={users.filter(u => u.attendance && u.attendance.some(a => a.date === dayjs().format('YYYY-MM-DD') && a.comingTime && !a.finishingTime)).length} />
               </Card>
             </Col>
           </Row>
@@ -167,7 +164,6 @@ function SuperAdminDashboard() {
                 <List
                   itemLayout="horizontal"
                   dataSource={topUsers}
-                  loading={loading}
                   renderItem={(user, idx) => (
                     <List.Item>
                       <List.Item.Meta
@@ -185,8 +181,8 @@ function SuperAdminDashboard() {
             <Col xs={24} md={8}>
               <Card title="Quick Actions" bordered={false} style={{ borderRadius: 12, marginBottom: 24 }}>
                 <ul style={{ paddingLeft: 20 }}>
-                  <li><a href="#" onClick={e => { e.preventDefault(); navigate('/dashboard/super/view-all-users'); }}>View All Users</a></li>
-                  <li><a href="#" onClick={e => { e.preventDefault(); navigate('/dashboard/super/add-user'); }}>Add New User</a></li>
+                  <li><button type="button" style={{ background: 'none', border: 'none', color: '#1677ff', cursor: 'pointer', padding: 0, textDecoration: 'underline' }} onClick={() => navigate('/dashboard/super/view-all-users')}>View All Users</button></li>
+                  <li><button type="button" style={{ background: 'none', border: 'none', color: '#1677ff', cursor: 'pointer', padding: 0, textDecoration: 'underline' }} onClick={() => navigate('/dashboard/super/add-user')}>Add New User</button></li>
                 </ul>
               </Card>
               <Card title="Recent Activities" bordered={false} style={{ borderRadius: 12 }}>
@@ -209,11 +205,9 @@ function SecondaryAdminDashboard() {
   const email = localStorage.getItem('adminEmail') || 'Secondary Admin';
   const navigate = useNavigate();
   const [users, setUsers] = React.useState([]);
-  const [loading, setLoading] = React.useState(false);
 
   React.useEffect(() => {
     async function fetchUsers() {
-      setLoading(true);
       try {
         const token = localStorage.getItem('token');
         const res = await fetch('/api/users', {
@@ -222,7 +216,6 @@ function SecondaryAdminDashboard() {
         const data = await res.json();
         if (res.ok) setUsers(data);
       } catch {}
-      setLoading(false);
     }
     fetchUsers();
   }, []);
@@ -315,17 +308,17 @@ function SecondaryAdminDashboard() {
           <Row gutter={[24, 24]}>
             <Col xs={24} md={8}>
               <Card bordered={false} style={{ borderRadius: 12 }}>
-                <Statistic title="Total Users" value={users.length} loading={loading} />
+                <Statistic title="Total Users" value={users.length} />
               </Card>
             </Col>
             <Col xs={24} md={8}>
               <Card bordered={false} style={{ borderRadius: 12 }}>
-                <Statistic title="Total Duty Time" value={formatDutyTime(totalDutyTime)} loading={loading} />
+                <Statistic title="Total Duty Time" value={formatDutyTime(totalDutyTime)} />
               </Card>
             </Col>
             <Col xs={24} md={8}>
               <Card bordered={false} style={{ borderRadius: 12 }}>
-                <Statistic title="Active Users" value={users.filter(u => u.attendance && u.attendance.some(a => a.date === dayjs().format('YYYY-MM-DD') && a.comingTime && !a.finishingTime)).length} loading={loading} />
+                <Statistic title="Active Users" value={users.filter(u => u.attendance && u.attendance.some(a => a.date === dayjs().format('YYYY-MM-DD') && a.comingTime && !a.finishingTime)).length} />
               </Card>
             </Col>
           </Row>
@@ -341,7 +334,6 @@ function SecondaryAdminDashboard() {
                 <List
                   itemLayout="horizontal"
                   dataSource={topUsers}
-                  loading={loading}
                   renderItem={(user, idx) => (
                     <List.Item>
                       <List.Item.Meta
@@ -359,8 +351,8 @@ function SecondaryAdminDashboard() {
             <Col xs={24} md={8}>
               <Card title="Quick Actions" bordered={false} style={{ borderRadius: 12, marginBottom: 24 }}>
                 <ul style={{ paddingLeft: 20 }}>
-                  <li><a href="#" onClick={e => { e.preventDefault(); navigate('/dashboard/secondary/view-users'); }}>View Users</a></li>
-                  <li><a href="#" onClick={e => { e.preventDefault(); navigate('/dashboard/secondary/update-duty'); }}>Update Duty Times</a></li>
+                  <li><button type="button" style={{ background: 'none', border: 'none', color: '#1677ff', cursor: 'pointer', padding: 0, textDecoration: 'underline' }} onClick={() => navigate('/dashboard/secondary/view-users')}>View Users</button></li>
+                  <li><button type="button" style={{ background: 'none', border: 'none', color: '#1677ff', cursor: 'pointer', padding: 0, textDecoration: 'underline' }} onClick={() => navigate('/dashboard/secondary/update-duty')}>Update Duty Times</button></li>
                 </ul>
               </Card>
               <Card title="Recent Activities" bordered={false} style={{ borderRadius: 12 }}>
@@ -383,7 +375,6 @@ function SecondaryAdminViewUsers() {
   const email = localStorage.getItem('adminEmail') || 'Secondary Admin';
   const navigate = useNavigate();
   const [users, setUsers] = React.useState([]);
-  const [loading, setLoading] = React.useState(false);
   const [search, setSearch] = React.useState('');
 
   function calculateLiveDutyTime(user) {
@@ -477,7 +468,6 @@ function SecondaryAdminViewUsers() {
 
   React.useEffect(() => {
     async function fetchUsers() {
-      setLoading(true);
       try {
         const token = localStorage.getItem('token');
         const res = await fetch('/api/users', {
@@ -486,7 +476,6 @@ function SecondaryAdminViewUsers() {
         const data = await res.json();
         if (res.ok) setUsers(data);
       } catch {}
-      setLoading(false);
     }
     fetchUsers();
   }, []);
@@ -559,7 +548,7 @@ function SecondaryAdminViewUsers() {
             onChange={e => setSearch(e.target.value)}
             style={{ marginBottom: 16, width: 320, padding: 8, borderRadius: 4, border: '1px solid #ccc' }}
           />
-          <Table columns={columns} dataSource={filteredUsers} rowKey="_id" loading={loading} />
+          <Table columns={columns} dataSource={filteredUsers} rowKey="_id" />
         </Content>
       </Layout>
     </Layout>
@@ -615,7 +604,6 @@ function SecondaryAdminUpdateDuty() {
   const email = localStorage.getItem('adminEmail') || 'Secondary Admin';
   const navigate = useNavigate();
   const [users, setUsers] = React.useState([]);
-  const [loading, setLoading] = React.useState(false);
   const [selectedId, setSelectedId] = React.useState('');
   const [selectedUser, setSelectedUser] = React.useState(null);
   const [comingTime, setComingTime] = React.useState('');
@@ -627,7 +615,6 @@ function SecondaryAdminUpdateDuty() {
 
   React.useEffect(() => {
     async function fetchUsers() {
-      setLoading(true);
       try {
         const token = localStorage.getItem('token');
         const res = await fetch('/api/users', {
@@ -636,7 +623,6 @@ function SecondaryAdminUpdateDuty() {
         const data = await res.json();
         if (res.ok) setUsers(data);
       } catch {}
-      setLoading(false);
     }
     fetchUsers();
   }, []);
@@ -867,7 +853,7 @@ function SecondaryAdminUpdateDuty() {
           {attendance && attendance.length > 0 && (
             <div style={{ maxWidth: 700, margin: '40px auto 0 auto' }}>
               <h3>Selected User Attendance Records</h3>
-              <Table columns={attendanceColumns} dataSource={attendance} rowKey="date" pagination={{ pageSize: 7 }} />
+              <Table columns={attendanceColumns} dataSource={attendance} rowKey="date" />
             </div>
           )}
         </Content>
@@ -881,7 +867,6 @@ function SuperAdminUpdateDuty() {
   const email = localStorage.getItem('adminEmail') || 'Super Admin';
   const navigate = useNavigate();
   const [users, setUsers] = React.useState([]);
-  const [loading, setLoading] = React.useState(false);
   const [selectedId, setSelectedId] = React.useState('');
   const [selectedUser, setSelectedUser] = React.useState(null);
   const [comingTime, setComingTime] = React.useState('');
@@ -893,7 +878,6 @@ function SuperAdminUpdateDuty() {
 
   React.useEffect(() => {
     async function fetchUsers() {
-      setLoading(true);
       try {
         const token = localStorage.getItem('token');
         const res = await fetch('/api/users', {
@@ -902,7 +886,6 @@ function SuperAdminUpdateDuty() {
         const data = await res.json();
         if (res.ok) setUsers(data);
       } catch {}
-      setLoading(false);
     }
     fetchUsers();
   }, []);
@@ -1118,7 +1101,7 @@ function SuperAdminUpdateDuty() {
           {attendance && attendance.length > 0 && (
             <div style={{ maxWidth: 700, margin: '40px auto 0 auto' }}>
               <h3>Selected User Attendance Records</h3>
-              <Table columns={attendanceColumns} dataSource={attendance} rowKey="date" pagination={{ pageSize: 7 }} />
+              <Table columns={attendanceColumns} dataSource={attendance} rowKey="date" />
             </div>
           )}
         </Content>
@@ -1132,14 +1115,12 @@ function AttendanceHistory() {
   const email = localStorage.getItem('adminEmail') || 'Admin';
   const navigate = useNavigate();
   const [users, setUsers] = React.useState([]);
-  const [loading, setLoading] = React.useState(false);
   const [historyFilterDate, setHistoryFilterDate] = React.useState('');
   const [allAttendanceHistory, setAllAttendanceHistory] = React.useState([]);
   const [selectedUserFilter, setSelectedUserFilter] = React.useState('');
 
   React.useEffect(() => {
     async function fetchUsers() {
-      setLoading(true);
       try {
         const token = localStorage.getItem('token');
         const res = await fetch('/api/users', {
@@ -1165,7 +1146,6 @@ function AttendanceHistory() {
           setAllAttendanceHistory(allHistory);
         }
       } catch {}
-      setLoading(false);
     }
     fetchUsers();
   }, []);
@@ -1374,7 +1354,7 @@ function AttendanceHistory() {
               showQuickJumper: true,
               showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} records`
             }}
-            loading={loading}
+            loading={false}
             scroll={{ x: 800 }}
             size="middle"
           />
