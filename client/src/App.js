@@ -13,6 +13,9 @@ import { TrophyTwoTone, CrownTwoTone, SmileTwoTone, LikeTwoTone, DownloadOutline
 
 dayjs.extend(customParseFormat);
 
+// Use environment variable for API URL, fallback to empty string for proxy
+const API_URL = process.env.REACT_APP_API_URL || '';
+
 const { Sider, Content, Header } = Layout;
 
 function useSessionTimeout() {
@@ -38,7 +41,7 @@ function SuperAdminDashboard() {
     async function fetchUsers() {
       try {
         const token = localStorage.getItem('token');
-        const res = await fetch('/api/users', {
+        const res = await fetch(`${API_URL}/api/users`, {
           headers: { 'Authorization': `Bearer ${token}` },
         });
         const data = await res.json();
@@ -210,7 +213,7 @@ function SecondaryAdminDashboard() {
     async function fetchUsers() {
       try {
         const token = localStorage.getItem('token');
-        const res = await fetch('/api/users', {
+        const res = await fetch(`${API_URL}/api/users`, {
           headers: { 'Authorization': `Bearer ${token}` },
         });
         const data = await res.json();
@@ -423,7 +426,7 @@ function SecondaryAdminViewUsers() {
   const handleResendQR = async (userId, userName) => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`/api/users/${userId}/resend-qr`, {
+      const res = await fetch(`${API_URL}/api/users/${userId}/resend-qr`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -470,7 +473,7 @@ function SecondaryAdminViewUsers() {
     async function fetchUsers() {
       try {
         const token = localStorage.getItem('token');
-        const res = await fetch('/api/users', {
+        const res = await fetch(`${API_URL}/api/users`, {
           headers: { 'Authorization': `Bearer ${token}` },
         });
         const data = await res.json();
@@ -617,7 +620,7 @@ function SecondaryAdminUpdateDuty() {
     async function fetchUsers() {
       try {
         const token = localStorage.getItem('token');
-        const res = await fetch('/api/users', {
+        const res = await fetch(`${API_URL}/api/users`, {
           headers: { 'Authorization': `Bearer ${token}` },
         });
         const data = await res.json();
@@ -631,7 +634,7 @@ function SecondaryAdminUpdateDuty() {
     async function fetchUserDetails() {
       if (selectedId) {
         const token = localStorage.getItem('token');
-        const res = await fetch(`/api/users/${selectedId}`, {
+        const res = await fetch(`${API_URL}/api/users/${selectedId}`, {
           headers: { 'Authorization': `Bearer ${token}` },
         });
         const data = await res.json();
@@ -672,7 +675,7 @@ function SecondaryAdminUpdateDuty() {
     if (!comingTime) return setErrorMsg('Please enter coming time.');
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`/api/users/${selectedId}/duty`, {
+      const res = await fetch(`${API_URL}/api/users/${selectedId}/duty`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -685,7 +688,7 @@ function SecondaryAdminUpdateDuty() {
         setSuccessMsg('Coming time updated successfully!');
         setTimeout(() => setSuccessMsg(''), 2000);
         // Refresh user details
-        const userRes = await fetch(`/api/users/${selectedId}`, {
+        const userRes = await fetch(`${API_URL}/api/users/${selectedId}`, {
           headers: { 'Authorization': `Bearer ${token}` },
         });
         const userData = await userRes.json();
@@ -721,7 +724,7 @@ function SecondaryAdminUpdateDuty() {
     }
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`/api/users/${selectedId}/duty`, {
+      const res = await fetch(`${API_URL}/api/users/${selectedId}/duty`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -734,7 +737,7 @@ function SecondaryAdminUpdateDuty() {
         setSuccessMsg('Finishing time updated successfully!');
         setTimeout(() => setSuccessMsg(''), 2000);
         // Refresh user details
-        const userRes = await fetch(`/api/users/${selectedId}`, {
+        const userRes = await fetch(`${API_URL}/api/users/${selectedId}`, {
           headers: { 'Authorization': `Bearer ${token}` },
         });
         const userData = await userRes.json();
@@ -880,7 +883,7 @@ function SuperAdminUpdateDuty() {
     async function fetchUsers() {
       try {
         const token = localStorage.getItem('token');
-        const res = await fetch('/api/users', {
+        const res = await fetch(`${API_URL}/api/users`, {
           headers: { 'Authorization': `Bearer ${token}` },
         });
         const data = await res.json();
@@ -894,7 +897,7 @@ function SuperAdminUpdateDuty() {
     async function fetchUserDetails() {
       if (selectedId) {
         const token = localStorage.getItem('token');
-        const res = await fetch(`/api/users/${selectedId}`, {
+        const res = await fetch(`${API_URL}/api/users/${selectedId}`, {
           headers: { 'Authorization': `Bearer ${token}` },
         });
         const data = await res.json();
@@ -935,7 +938,7 @@ function SuperAdminUpdateDuty() {
     if (!comingTime) return setErrorMsg('Please enter coming time.');
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`/api/users/${selectedId}/duty`, {
+      const res = await fetch(`${API_URL}/api/users/${selectedId}/duty`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -948,7 +951,7 @@ function SuperAdminUpdateDuty() {
         setSuccessMsg('Coming time updated successfully!');
         setTimeout(() => setSuccessMsg(''), 2000);
         // Refresh user details
-        const userRes = await fetch(`/api/users/${selectedId}`, {
+        const userRes = await fetch(`${API_URL}/api/users/${selectedId}`, {
           headers: { 'Authorization': `Bearer ${token}` },
         });
         const userData = await userRes.json();
@@ -984,7 +987,7 @@ function SuperAdminUpdateDuty() {
     }
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`/api/users/${selectedId}/duty`, {
+      const res = await fetch(`${API_URL}/api/users/${selectedId}/duty`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -997,7 +1000,7 @@ function SuperAdminUpdateDuty() {
         setSuccessMsg('Finishing time updated successfully!');
         setTimeout(() => setSuccessMsg(''), 2000);
         // Refresh user details
-        const userRes = await fetch(`/api/users/${selectedId}`, {
+        const userRes = await fetch(`${API_URL}/api/users/${selectedId}`, {
           headers: { 'Authorization': `Bearer ${token}` },
         });
         const userData = await userRes.json();
@@ -1123,7 +1126,7 @@ function AttendanceHistory() {
     async function fetchUsers() {
       try {
         const token = localStorage.getItem('token');
-        const res = await fetch('/api/users', {
+        const res = await fetch(`${API_URL}/api/users`, {
           headers: { 'Authorization': `Bearer ${token}` },
         });
         const data = await res.json();
