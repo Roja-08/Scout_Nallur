@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 5050;
 const MONGO_URI = process.env.MONGO_URI;
 
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: ['http://localhost:3000', 'https://lambent-seahorse-8eee53.netlify.app'],
   credentials: true,
 }));
 app.use(express.json());
