@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Button, Popconfirm, Modal, message, Avatar, Space, Layout, Menu, Form, Input, Row, Col, Typography, Tooltip, Dropdown } from 'antd';
-import { EditOutlined, DeleteOutlined, EyeOutlined, QrcodeOutlined, DownloadOutlined, MoreOutlined, UserOutlined } from '@ant-design/icons';
+import { Table, Button, Popconfirm, Modal, message, Avatar, Space, Layout, Menu, Form, Input, Row, Col, Typography, Tooltip, Dropdown, Card, Divider } from 'antd';
+import { EditOutlined, DeleteOutlined, EyeOutlined, QrcodeOutlined, DownloadOutlined, MoreOutlined, UserOutlined, PhoneOutlined, MailOutlined, IdcardOutlined } from '@ant-design/icons';
 import { logout } from '../utils/auth';
 import { useNavigate } from 'react-router-dom';
 import { uploadToCloudinary } from '../utils/cloudinary';
 
 const { Sider, Content, Header } = Layout;
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
 export default function ViewAllUsers() {
   const [users, setUsers] = useState([]);
@@ -14,6 +14,7 @@ export default function ViewAllUsers() {
   const [editingUser, setEditingUser] = useState(null);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editForm] = Form.useForm();
+  const [editLoading, setEditLoading] = useState(false);
 
   const email = localStorage.getItem('adminEmail') || 'Super Admin';
   const navigate = useNavigate();
@@ -74,6 +75,9 @@ export default function ViewAllUsers() {
   const handleEditModalClose = () => {
     setEditModalVisible(false);
     editForm.resetFields();
+    setEditProfilePic(null);
+    setEditPreview('');
+    setEditLoading(false);
   };
 
   const handleEditFileChange = e => {
@@ -84,11 +88,20 @@ export default function ViewAllUsers() {
 
   const handleEditSubmit = async () => {
     try {
+      setEditLoading(true);
       const values = await editForm.validateFields();
       let profilePicUrl = editingUser.profilePic;
+      
       if (editProfilePic) {
-        profilePicUrl = await uploadToCloudinary(editProfilePic);
+        try {
+          profilePicUrl = await uploadToCloudinary(editProfilePic);
+        } catch (uploadError) {
+          message.error('Failed to upload profile picture');
+          setEditLoading(false);
+          return;
+        }
       }
+      
       const token = localStorage.getItem('token');
       const res = await fetch(`${process.env.REACT_APP_API_URL || ''}/api/users/${editingUser._id}`, {
         method: 'PUT',
@@ -98,22 +111,24 @@ export default function ViewAllUsers() {
         },
         body: JSON.stringify({ ...values, profilePic: profilePicUrl }),
       });
+      
       const data = await res.json();
       if (res.ok) {
-        message.success('User updated');
+        message.success('User updated successfully');
         setEditModalVisible(false);
         setTimeout(fetchUsers, 500);
       } else {
         message.error(data.message || 'Failed to update user');
       }
-          } catch (err) {
-        if (err.errorFields) {
-          // Form validation errors - Ant Design Form handles these automatically
-          message.error('Please check the form fields');
-        } else {
-          message.error('Failed to update user');
-        }
+    } catch (err) {
+      if (err.errorFields) {
+        message.error('Please check the form fields');
+      } else {
+        message.error('Failed to update user');
       }
+    } finally {
+      setEditLoading(false);
+    }
   };
 
   const handleResendQR = async (userId, userName) => {
@@ -136,18 +151,29 @@ export default function ViewAllUsers() {
     }
   };
 
-  // Mobile responsive columns
+  // Enhanced mobile responsive columns
   const columns = [
     { 
       title: 'User Info', 
       key: 'userInfo',
       responsive: ['md'],
       render: (_, user) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Avatar src={user.profilePic} size={40} icon={<UserOutlined />} />
-          <div>
-            <div style={{ fontWeight: 600 }}>{user.name}</div>
-            <div style={{ fontSize: 12, color: '#666' }}>{user._id}</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <Avatar src={user.profilePic} size={48} icon={<UserOutlined />} />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 4 }}>{user.name}</div>
+            <div style={{ fontSize: 12, color: '#666', marginBottom: 2 }}>
+              <MailOutlined style={{ marginRight: 4 }} />
+              {user.email}
+            </div>
+            <div style={{ fontSize: 12, color: '#666', marginBottom: 2 }}>
+              <PhoneOutlined style={{ marginRight: 4 }} />
+              {user.phoneNumber}
+            </div>
+            <div style={{ fontSize: 12, color: '#666' }}>
+              <IdcardOutlined style={{ marginRight: 4 }} />
+              {user.nic}
+            </div>
           </div>
         </div>
       )
@@ -157,35 +183,35 @@ export default function ViewAllUsers() {
       dataIndex: '_id', 
       key: '_id',
       responsive: ['lg'],
-      render: (id) => <span style={{ fontFamily: 'monospace', fontSize: 12 }}>{id}</span>
+      render: (id) => <Text code style={{ fontSize: 11 }}>{id}</Text>
     },
     { 
       title: 'Name', 
       dataIndex: 'name', 
       key: 'name',
       responsive: ['lg'],
-      render: (name) => <span style={{ fontWeight: 500 }}>{name}</span>
+      render: (name) => <Text strong>{name}</Text>
     },
     { 
       title: 'Email', 
       dataIndex: 'email', 
       key: 'email',
       responsive: ['lg'],
-      render: (email) => <span style={{ fontSize: 13 }}>{email}</span>
+      render: (email) => <Text>{email}</Text>
     },
     { 
       title: 'Phone', 
       dataIndex: 'phoneNumber', 
       key: 'phoneNumber',
       responsive: ['lg'],
-      render: (phone) => <span>{phone}</span>
+      render: (phone) => <Text>{phone}</Text>
     },
     { 
       title: 'NIC', 
       dataIndex: 'nic', 
       key: 'nic',
       responsive: ['lg'],
-      render: (nic) => <span style={{ fontFamily: 'monospace' }}>{nic}</span>
+      render: (nic) => <Text code>{nic}</Text>
     },
     { 
       title: 'Profile', 
@@ -197,6 +223,8 @@ export default function ViewAllUsers() {
     {
       title: 'Actions',
       key: 'actions',
+      fixed: 'right',
+      width: 120,
       render: (_, user) => {
         const actionItems = [
           {
@@ -279,6 +307,84 @@ export default function ViewAllUsers() {
     },
   ];
 
+  // Mobile card view for small screens
+  const renderMobileCards = () => (
+    <div style={{ display: { xs: 'block', md: 'none' } }}>
+      {users.map(user => (
+        <Card 
+          key={user._id} 
+          style={{ marginBottom: 16 }}
+          bodyStyle={{ padding: 16 }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+            <Avatar src={user.profilePic} size={48} icon={<UserOutlined />} />
+            <div style={{ flex: 1 }}>
+              <Title level={5} style={{ margin: 0, marginBottom: 4 }}>{user.name}</Title>
+              <Text type="secondary" style={{ fontSize: 12 }}>
+                <MailOutlined style={{ marginRight: 4 }} />
+                {user.email}
+              </Text>
+            </div>
+          </div>
+          
+          <div style={{ marginBottom: 12 }}>
+            <div style={{ marginBottom: 4 }}>
+              <Text type="secondary" style={{ fontSize: 12 }}>
+                <PhoneOutlined style={{ marginRight: 4 }} />
+                {user.phoneNumber}
+              </Text>
+            </div>
+            <div style={{ marginBottom: 4 }}>
+              <Text type="secondary" style={{ fontSize: 12 }}>
+                <IdcardOutlined style={{ marginRight: 4 }} />
+                {user.nic}
+              </Text>
+            </div>
+            <div>
+              <Text code style={{ fontSize: 11 }}>{user._id}</Text>
+            </div>
+          </div>
+          
+          <Divider style={{ margin: '12px 0' }} />
+          
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+            <Button 
+              size="small" 
+              icon={<EyeOutlined />}
+              onClick={() => window.open(`${process.env.REACT_APP_API_URL || ''}/user/${user._id}`, '_blank')}
+            >
+              View
+            </Button>
+            <Button 
+              size="small" 
+              icon={<EditOutlined />}
+              onClick={() => handleEdit(user)}
+            >
+              Edit
+            </Button>
+            <Button 
+              size="small" 
+              icon={<QrcodeOutlined />}
+              onClick={() => handleResendQR(user._id, user.name)}
+            >
+              QR
+            </Button>
+            <Popconfirm 
+              title="Delete user?" 
+              description="This action cannot be undone."
+              onConfirm={() => handleDelete(user._id)} 
+              okText="Yes" 
+              cancelText="No"
+              okType="danger"
+            >
+              <Button size="small" icon={<DeleteOutlined />} danger />
+            </Popconfirm>
+          </div>
+        </Card>
+      ))}
+    </div>
+  );
+
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider breakpoint="lg" collapsedWidth="0">
@@ -348,20 +454,27 @@ export default function ViewAllUsers() {
             </Col>
           </Row>
           
-          <Table 
-            columns={columns} 
-            dataSource={users} 
-            rowKey="_id" 
-            loading={loading}
-            scroll={{ x: 800 }}
-            pagination={{
-              showSizeChanger: true,
-              showQuickJumper: true,
-              showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} users`,
-              pageSizeOptions: ['10', '20', '50', '100']
-            }}
-            size="middle"
-          />
+          {/* Mobile card view */}
+          {renderMobileCards()}
+          
+          {/* Desktop table view */}
+          <div style={{ display: { xs: 'none', md: 'block' } }}>
+            <Table 
+              columns={columns} 
+              dataSource={users} 
+              rowKey="_id" 
+              loading={loading}
+              scroll={{ x: 1200 }}
+              pagination={{
+                showSizeChanger: true,
+                showQuickJumper: true,
+                showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} users`,
+                pageSizeOptions: ['10', '20', '50', '100'],
+                responsive: true
+              }}
+              size="middle"
+            />
+          </div>
           
           <Modal
             title="Edit User"
@@ -369,6 +482,8 @@ export default function ViewAllUsers() {
             onCancel={handleEditModalClose}
             onOk={handleEditSubmit}
             okText="Save"
+            cancelText="Cancel"
+            confirmLoading={editLoading}
             width={600}
             destroyOnClose
           >
@@ -423,17 +538,20 @@ export default function ViewAllUsers() {
               </Row>
               
               <Form.Item label="Profile Photo">
-                <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
                   <input 
                     type="file" 
                     accept="image/*" 
                     onChange={handleEditFileChange}
-                    style={{ flex: 1 }}
+                    style={{ flex: 1, minWidth: 200 }}
                   />
                   {editPreview && (
                     <Avatar src={editPreview} size={64} icon={<UserOutlined />} />
                   )}
                 </div>
+                <Text type="secondary" style={{ fontSize: 12 }}>
+                  Leave empty to keep current profile picture
+                </Text>
               </Form.Item>
             </Form>
           </Modal>

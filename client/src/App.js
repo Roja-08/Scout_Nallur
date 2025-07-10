@@ -2,14 +2,14 @@ import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
-import { ConfigProvider, Layout, Menu, Button, Card, Row, Col, Statistic, List, Avatar, Table, DatePicker, message, Space } from 'antd';
+import { ConfigProvider, Layout, Menu, Button, Card, Row, Col, Statistic, List, Avatar, Table, DatePicker, message, Space, Form, Input, Select, Typography, Alert } from 'antd';
 import Home from './pages/Home';
 import Login from './Login';
 import { isAuthenticated, getAdminRole, logout, startSessionTimer, resetSessionTimer } from './utils/auth';
 import AddUserForm from './components/AddUserForm';
 import UserStatusPage from './pages/UserStatusPage';
 import ViewAllUsers from './pages/ViewAllUsers';
-import { TrophyTwoTone, CrownTwoTone, SmileTwoTone, LikeTwoTone, DownloadOutlined, QrcodeOutlined, EyeOutlined } from '@ant-design/icons';
+import { TrophyTwoTone, CrownTwoTone, SmileTwoTone, LikeTwoTone, DownloadOutlined, QrcodeOutlined, EyeOutlined, UserOutlined } from '@ant-design/icons';
 
 dayjs.extend(customParseFormat);
 
@@ -17,6 +17,7 @@ dayjs.extend(customParseFormat);
 const API_URL = process.env.REACT_APP_API_URL || '';
 
 const { Sider, Content, Header } = Layout;
+const { Title, Text } = Typography;
 
 function useSessionTimeout() {
   useEffect(() => {
@@ -878,17 +879,25 @@ function SuperAdminUpdateDuty() {
   const [errorMsg, setErrorMsg] = React.useState('');
   const [date, setDate] = React.useState(dayjs().format('YYYY-MM-DD'));
   const [attendance, setAttendance] = React.useState([]);
+  const [loading, setLoading] = React.useState(false);
+  const [updating, setUpdating] = React.useState(false);
 
   React.useEffect(() => {
     async function fetchUsers() {
+      setLoading(true);
       try {
         const token = localStorage.getItem('token');
-        const res = await fetch(`${API_URL}/api/users`, {
+        const res = await fetch(`${process.env.REACT_APP_API_URL || ''}/api/users`, {
           headers: { 'Authorization': `Bearer ${token}` },
         });
         const data = await res.json();
         if (res.ok) setUsers(data);
-      } catch {}
+        else message.error(data.message || 'Failed to fetch users');
+      } catch (err) {
+        message.error('Failed to fetch users');
+      } finally {
+        setLoading(false);
+      }
     }
     fetchUsers();
   }, []);
@@ -896,17 +905,24 @@ function SuperAdminUpdateDuty() {
   React.useEffect(() => {
     async function fetchUserDetails() {
       if (selectedId) {
-        const token = localStorage.getItem('token');
-        const res = await fetch(`${API_URL}/api/users/${selectedId}`, {
-          headers: { 'Authorization': `Bearer ${token}` },
-        });
-        const data = await res.json();
-        if (res.ok) {
-          setSelectedUser(data);
-          setAttendance(data.attendance || []);
-        } else {
+        try {
+          const token = localStorage.getItem('token');
+          const res = await fetch(`${process.env.REACT_APP_API_URL || ''}/api/users/${selectedId}`, {
+            headers: { 'Authorization': `Bearer ${token}` },
+          });
+          const data = await res.json();
+          if (res.ok) {
+            setSelectedUser(data);
+            setAttendance(data.attendance || []);
+          } else {
+            setSelectedUser(null);
+            setAttendance([]);
+            message.error(data.message || 'Failed to fetch user details');
+          }
+        } catch (err) {
           setSelectedUser(null);
           setAttendance([]);
+          message.error('Failed to fetch user details');
         }
       } else {
         setSelectedUser(null);
@@ -933,12 +949,27 @@ function SuperAdminUpdateDuty() {
     e.preventDefault();
     setSuccessMsg('');
     setErrorMsg('');
-    if (!selectedId) return setErrorMsg('Please select a user.');
-    if (!date) return setErrorMsg('Please select a date.');
-    if (!comingTime) return setErrorMsg('Please enter coming time.');
+    setUpdating(true);
+    
+    if (!selectedId) {
+      setErrorMsg('Please select a user.');
+      setUpdating(false);
+      return;
+    }
+    if (!date) {
+      setErrorMsg('Please select a date.');
+      setUpdating(false);
+      return;
+    }
+    if (!comingTime) {
+      setErrorMsg('Please enter coming time.');
+      setUpdating(false);
+      return;
+    }
+    
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`${API_URL}/api/users/${selectedId}/duty`, {
+      const res = await fetch(`${process.env.REACT_APP_API_URL || ''}/api/users/${selectedId}/duty`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -948,10 +979,9 @@ function SuperAdminUpdateDuty() {
       });
       const data = await res.json();
       if (res.ok) {
-        setSuccessMsg('Coming time updated successfully!');
-        setTimeout(() => setSuccessMsg(''), 2000);
+        message.success('Coming time updated successfully!');
         // Refresh user details
-        const userRes = await fetch(`${API_URL}/api/users/${selectedId}`, {
+        const userRes = await fetch(`${process.env.REACT_APP_API_URL || ''}/api/users/${selectedId}`, {
           headers: { 'Authorization': `Bearer ${token}` },
         });
         const userData = await userRes.json();
@@ -960,10 +990,12 @@ function SuperAdminUpdateDuty() {
           setAttendance(userData.attendance || []);
         }
       } else {
-        setErrorMsg(data.message || 'Failed to update coming time');
+        message.error(data.message || 'Failed to update coming time');
       }
-    } catch {
-      setErrorMsg('Failed to update coming time');
+    } catch (err) {
+      message.error('Failed to update coming time');
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -971,9 +1003,24 @@ function SuperAdminUpdateDuty() {
     e.preventDefault();
     setSuccessMsg('');
     setErrorMsg('');
-    if (!selectedId) return setErrorMsg('Please select a user.');
-    if (!date) return setErrorMsg('Please select a date.');
-    if (!finishingTime) return setErrorMsg('Please enter finishing time.');
+    setUpdating(true);
+    
+    if (!selectedId) {
+      setErrorMsg('Please select a user.');
+      setUpdating(false);
+      return;
+    }
+    if (!date) {
+      setErrorMsg('Please select a date.');
+      setUpdating(false);
+      return;
+    }
+    if (!finishingTime) {
+      setErrorMsg('Please enter finishing time.');
+      setUpdating(false);
+      return;
+    }
+    
     // Check if comingTime exists and is before finishingTime
     if (comingTime && finishingTime) {
       const [ch, cm] = comingTime.split(':').map(Number);
@@ -982,12 +1029,14 @@ function SuperAdminUpdateDuty() {
       const end = fh * 60 + fm;
       if (end <= start) {
         setErrorMsg('Finishing time must be after coming time.');
+        setUpdating(false);
         return;
       }
     }
+    
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`${API_URL}/api/users/${selectedId}/duty`, {
+      const res = await fetch(`${process.env.REACT_APP_API_URL || ''}/api/users/${selectedId}/duty`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -997,10 +1046,9 @@ function SuperAdminUpdateDuty() {
       });
       const data = await res.json();
       if (res.ok) {
-        setSuccessMsg('Finishing time updated successfully!');
-        setTimeout(() => setSuccessMsg(''), 2000);
+        message.success('Finishing time updated successfully!');
         // Refresh user details
-        const userRes = await fetch(`${API_URL}/api/users/${selectedId}`, {
+        const userRes = await fetch(`${process.env.REACT_APP_API_URL || ''}/api/users/${selectedId}`, {
           headers: { 'Authorization': `Bearer ${token}` },
         });
         const userData = await userRes.json();
@@ -1009,10 +1057,12 @@ function SuperAdminUpdateDuty() {
           setAttendance(userData.attendance || []);
         }
       } else {
-        setErrorMsg(data.message || 'Failed to update finishing time');
+        message.error(data.message || 'Failed to update finishing time');
       }
-    } catch {
-      setErrorMsg('Failed to update finishing time');
+    } catch (err) {
+      message.error('Failed to update finishing time');
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -1053,58 +1103,137 @@ function SuperAdminUpdateDuty() {
           </div>
           <Button type="primary" danger onClick={logout}>Logout</Button>
         </Header>
-        <Content style={{ margin: 24, background: '#fff', borderRadius: 8, minHeight: 400, padding: 24 }}>
-          <h2>Update Duty Times</h2>
-          <form onSubmit={handleUpdateComing} style={{ maxWidth: 500, margin: '0 auto', background: '#f7faff', borderRadius: 8, padding: 24, boxShadow: '0 2px 12px #e6f7ff' }}>
-            <div style={{ marginBottom: 16 }}>
-              <label>User ID *</label><br />
-              <select value={selectedId} onChange={e => setSelectedId(e.target.value)} style={{ width: '100%', padding: 8 }}>
-                <option value="">Select a user</option>
-                {users.map(u => <option key={u._id} value={u._id}>{u._id} - {u.name}</option>)}
-              </select>
-            </div>
-            <div style={{ marginBottom: 16 }}>
-              <label>Date *</label><br />
-              <DatePicker
-                value={date ? dayjs(date) : null}
-                onChange={d => setDate(d ? d.format('YYYY-MM-DD') : '')}
-                style={{ width: '100%' }}
-                format="YYYY-MM-DD"
-                allowClear={false}
-                disabledDate={d => d && d.isAfter(dayjs(), 'day')}
-              />
-            </div>
-            {selectedUser && (
-              <div style={{ marginBottom: 16, background: '#fff', borderRadius: 8, padding: 16, boxShadow: '0 1px 6px #e6f7ff' }}>
-                <b>Name:</b> {selectedUser.name}<br />
-                <b>Email:</b> {selectedUser.email}<br />
-                <b>Phone:</b> {selectedUser.phoneNumber}<br />
-                <b>NIC:</b> {selectedUser.nic}<br />
-                <b>Current Duty Time:</b> {selectedUser.dutyTime} min<br />
-                {selectedUser.profilePic && <img src={selectedUser.profilePic} alt="Profile" style={{ width: 64, height: 64, borderRadius: '50%', marginTop: 8 }} />}
-              </div>
-            )}
-            <div style={{ marginBottom: 16 }}>
-              <label>Coming Time</label><br />
-              <input type="time" value={comingTime} onChange={e => setComingTime(e.target.value)} style={{ width: '100%', padding: 8 }} />
-              <button onClick={handleUpdateComing} style={{ marginTop: 8, padding: '6px 18px', background: '#1677ff', color: '#fff', border: 'none', borderRadius: 4 }}>Update Coming Time</button>
-            </div>
-            {comingTime && (
-              <div style={{ marginBottom: 16 }}>
-                <label>Finishing Time</label><br />
-                <input type="time" value={finishingTime} onChange={e => setFinishingTime(e.target.value)} style={{ width: '100%', padding: 8 }} />
-                <button onClick={handleUpdateFinishing} style={{ marginTop: 8, padding: '6px 18px', background: '#1677ff', color: '#fff', border: 'none', borderRadius: 4 }}>Update Finishing Time</button>
-              </div>
-            )}
-            {errorMsg && <div style={{ color: 'red', marginBottom: 12 }}>{errorMsg}</div>}
-            {successMsg && <div style={{ color: 'green', marginBottom: 12 }}>{successMsg}</div>}
-          </form>
+        <Content style={{ margin: { xs: 12, md: 24 }, background: '#fff', borderRadius: 8, minHeight: 400, padding: { xs: 16, md: 24 } }}>
+          <Title level={2} style={{ marginBottom: 24 }}>Update Duty Times</Title>
+          
+          <Card style={{ maxWidth: 600, margin: '0 auto', background: '#f7faff' }}>
+            <Form layout="vertical">
+              <Form.Item label="Select User *" required>
+                <Select
+                  value={selectedId}
+                  onChange={setSelectedId}
+                  placeholder="Select a user"
+                  loading={loading}
+                  showSearch
+                  filterOption={(input, option) =>
+                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                  }
+                  options={users.map(u => ({ value: u._id, label: `${u.name} (${u._id})` }))}
+                  style={{ width: '100%' }}
+                />
+              </Form.Item>
+              
+              <Form.Item label="Select Date *" required>
+                <DatePicker
+                  value={date ? dayjs(date) : null}
+                  onChange={d => setDate(d ? d.format('YYYY-MM-DD') : '')}
+                  style={{ width: '100%' }}
+                  format="YYYY-MM-DD"
+                  allowClear={false}
+                  disabledDate={d => d && d.isAfter(dayjs(), 'day')}
+                />
+              </Form.Item>
+              
+              {selectedUser && (
+                <Card size="small" style={{ marginBottom: 16, background: '#fff' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                    <Avatar src={selectedUser.profilePic} size={48} icon={<UserOutlined />} />
+                    <div>
+                      <Title level={5} style={{ margin: 0, marginBottom: 4 }}>{selectedUser.name}</Title>
+                      <Text type="secondary">{selectedUser.email}</Text>
+                    </div>
+                  </div>
+                  <Row gutter={16}>
+                    <Col xs={24} sm={12}>
+                      <Text strong>Phone:</Text> {selectedUser.phoneNumber}
+                    </Col>
+                    <Col xs={24} sm={12}>
+                      <Text strong>NIC:</Text> {selectedUser.nic}
+                    </Col>
+                  </Row>
+                </Card>
+              )}
+              
+              <Row gutter={16}>
+                <Col xs={24} md={12}>
+                  <Form.Item label="Coming Time">
+                    <Input
+                      type="time"
+                      value={comingTime}
+                      onChange={e => setComingTime(e.target.value)}
+                      style={{ width: '100%' }}
+                    />
+                    <Button
+                      type="primary"
+                      onClick={handleUpdateComing}
+                      loading={updating}
+                      disabled={!selectedId || !date || !comingTime}
+                      style={{ marginTop: 8, width: '100%' }}
+                    >
+                      Update Coming Time
+                    </Button>
+                  </Form.Item>
+                </Col>
+                <Col xs={24} md={12}>
+                  <Form.Item label="Finishing Time">
+                    <Input
+                      type="time"
+                      value={finishingTime}
+                      onChange={e => setFinishingTime(e.target.value)}
+                      style={{ width: '100%' }}
+                    />
+                    <Button
+                      type="primary"
+                      onClick={handleUpdateFinishing}
+                      loading={updating}
+                      disabled={!selectedId || !date || !finishingTime}
+                      style={{ marginTop: 8, width: '100%' }}
+                    >
+                      Update Finishing Time
+                    </Button>
+                  </Form.Item>
+                </Col>
+              </Row>
+              
+              {errorMsg && (
+                <Alert
+                  message="Error"
+                  description={errorMsg}
+                  type="error"
+                  showIcon
+                  style={{ marginBottom: 16 }}
+                />
+              )}
+              {successMsg && (
+                <Alert
+                  message="Success"
+                  description={successMsg}
+                  type="success"
+                  showIcon
+                  style={{ marginBottom: 16 }}
+                />
+              )}
+            </Form>
+          </Card>
           
           {/* Selected User Attendance Records */}
           {attendance && attendance.length > 0 && (
-            <div style={{ maxWidth: 700, margin: '40px auto 0 auto' }}>
-              <h3>Selected User Attendance Records</h3>
-              <Table columns={attendanceColumns} dataSource={attendance} rowKey="date" />
+            <div style={{ maxWidth: 800, margin: '40px auto 0 auto' }}>
+              <Title level={3} style={{ marginBottom: 16 }}>Selected User Attendance Records</Title>
+              <Table 
+                columns={attendanceColumns} 
+                dataSource={attendance} 
+                rowKey="date"
+                scroll={{ x: 400 }}
+                pagination={{
+                  showSizeChanger: true,
+                  showQuickJumper: true,
+                  showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} records`,
+                  pageSizeOptions: ['10', '20', '50'],
+                  responsive: true
+                }}
+                size="middle"
+              />
             </div>
           )}
         </Content>
