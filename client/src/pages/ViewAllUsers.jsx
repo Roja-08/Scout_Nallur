@@ -1,18 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Button, Popconfirm, Modal, message, Avatar, Space, Layout, Menu } from 'antd';
-import { EditOutlined, DeleteOutlined, EyeOutlined, QrcodeOutlined, DownloadOutlined } from '@ant-design/icons';
+import { Table, Button, Popconfirm, Modal, message, Avatar, Space, Layout, Menu, Form, Input, Upload, Row, Col, Card, Typography, Tooltip, Dropdown } from 'antd';
+import { EditOutlined, DeleteOutlined, EyeOutlined, QrcodeOutlined, DownloadOutlined, MoreOutlined, UserOutlined, UploadOutlined } from '@ant-design/icons';
 import { logout } from '../utils/auth';
 import { useNavigate } from 'react-router-dom';
 import { uploadToCloudinary } from '../utils/cloudinary';
 
 const { Sider, Content, Header } = Layout;
+const { Title } = Typography;
 
 export default function ViewAllUsers() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [editModalVisible, setEditModalVisible] = useState(false);
-  const [editForm, setEditForm] = useState({ name: '', email: '', phoneNumber: '', nic: '' });
+  const [editForm] = Form.useForm();
   const [editErrors, setEditErrors] = useState({});
   const email = localStorage.getItem('adminEmail') || 'Super Admin';
   const navigate = useNavigate();
@@ -41,7 +42,7 @@ export default function ViewAllUsers() {
   const handleDelete = async (id) => {
     const token = localStorage.getItem('token');
     try {
-      const res = await fetch(`/api/users/${id}`, {
+      const res = await fetch(`${process.env.REACT_APP_API_URL || ''}/api/users/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` },
       });
@@ -62,13 +63,18 @@ export default function ViewAllUsers() {
     setEditModalVisible(true);
     setEditProfilePic(null);
     setEditPreview(user.profilePic || '');
-    setEditForm({ name: user.name || '', email: user.email || '', phoneNumber: user.phoneNumber || '', nic: user.nic || '' });
+    editForm.setFieldsValue({
+      name: user.name || '',
+      email: user.email || '',
+      phoneNumber: user.phoneNumber || '',
+      nic: user.nic || ''
+    });
     setEditErrors({});
   };
 
   const handleEditModalClose = () => {
     setEditModalVisible(false);
-    setTimeout(() => setEditForm({ name: '', email: '', phoneNumber: '', nic: '' }), 300);
+    editForm.resetFields();
     setEditErrors({});
   };
 
@@ -78,36 +84,21 @@ export default function ViewAllUsers() {
     setEditPreview(file ? URL.createObjectURL(file) : (editingUser?.profilePic || ''));
   };
 
-  const handleEditInputChange = e => {
-    setEditForm({ ...editForm, [e.target.name]: e.target.value });
-  };
-
-  const validateEdit = () => {
-    const errs = {};
-    if (!editForm.name) errs.name = 'Please enter Name';
-    if (!editForm.email) errs.email = 'Please enter Email';
-    if (!editForm.phoneNumber) errs.phoneNumber = 'Please enter Phone Number';
-    if (!editForm.nic) errs.nic = 'Please enter NIC';
-    return errs;
-  };
-
   const handleEditSubmit = async () => {
-    const errs = validateEdit();
-    setEditErrors(errs);
-    if (Object.keys(errs).length > 0) return;
     try {
+      const values = await editForm.validateFields();
       let profilePicUrl = editingUser.profilePic;
       if (editProfilePic) {
         profilePicUrl = await uploadToCloudinary(editProfilePic);
       }
       const token = localStorage.getItem('token');
-      const res = await fetch(`/api/users/${editingUser._id}`, {
+      const res = await fetch(`${process.env.REACT_APP_API_URL || ''}/api/users/${editingUser._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({ ...editForm, profilePic: profilePicUrl }),
+        body: JSON.stringify({ ...values, profilePic: profilePicUrl }),
       });
       const data = await res.json();
       if (res.ok) {
@@ -118,14 +109,23 @@ export default function ViewAllUsers() {
         message.error(data.message || 'Failed to update user');
       }
     } catch (err) {
-      message.error('Failed to update user');
+      if (err.errorFields) {
+        // Form validation errors
+        const errors = {};
+        err.errorFields.forEach(field => {
+          errors[field.name[0]] = field.errors[0];
+        });
+        setEditErrors(errors);
+      } else {
+        message.error('Failed to update user');
+      }
     }
   };
 
   const handleResendQR = async (userId, userName) => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`/api/users/${userId}/resend-qr`, {
+      const res = await fetch(`${process.env.REACT_APP_API_URL || ''}/api/users/${userId}/resend-qr`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -142,32 +142,146 @@ export default function ViewAllUsers() {
     }
   };
 
+  // Mobile responsive columns
   const columns = [
-    { title: 'ID', dataIndex: '_id', key: '_id' },
-    { title: 'Name', dataIndex: 'name', key: 'name' },
-    { title: 'Email', dataIndex: 'email', key: 'email' },
-    { title: 'Phone', dataIndex: 'phoneNumber', key: 'phoneNumber' },
-    { title: 'NIC', dataIndex: 'nic', key: 'nic' },
-    { title: 'Profile', dataIndex: 'profilePic', key: 'profilePic', render: url => url ? <Avatar src={url} /> : '-' },
+    { 
+      title: 'User Info', 
+      key: 'userInfo',
+      responsive: ['md'],
+      render: (_, user) => (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <Avatar src={user.profilePic} size={40} icon={<UserOutlined />} />
+          <div>
+            <div style={{ fontWeight: 600 }}>{user.name}</div>
+            <div style={{ fontSize: 12, color: '#666' }}>{user._id}</div>
+          </div>
+        </div>
+      )
+    },
+    { 
+      title: 'ID', 
+      dataIndex: '_id', 
+      key: '_id',
+      responsive: ['lg'],
+      render: (id) => <span style={{ fontFamily: 'monospace', fontSize: 12 }}>{id}</span>
+    },
+    { 
+      title: 'Name', 
+      dataIndex: 'name', 
+      key: 'name',
+      responsive: ['lg'],
+      render: (name) => <span style={{ fontWeight: 500 }}>{name}</span>
+    },
+    { 
+      title: 'Email', 
+      dataIndex: 'email', 
+      key: 'email',
+      responsive: ['lg'],
+      render: (email) => <span style={{ fontSize: 13 }}>{email}</span>
+    },
+    { 
+      title: 'Phone', 
+      dataIndex: 'phoneNumber', 
+      key: 'phoneNumber',
+      responsive: ['lg'],
+      render: (phone) => <span>{phone}</span>
+    },
+    { 
+      title: 'NIC', 
+      dataIndex: 'nic', 
+      key: 'nic',
+      responsive: ['lg'],
+      render: (nic) => <span style={{ fontFamily: 'monospace' }}>{nic}</span>
+    },
+    { 
+      title: 'Profile', 
+      dataIndex: 'profilePic', 
+      key: 'profilePic',
+      responsive: ['lg'],
+      render: url => url ? <Avatar src={url} size={32} /> : <Avatar icon={<UserOutlined />} size={32} />
+    },
     {
       title: 'Actions',
       key: 'actions',
-      render: (_, user) => (
-        <Space>
-          <Button icon={<EyeOutlined />} onClick={() => window.open(`/user/${user._id}`, '_blank')}>View</Button>
-          <Button icon={<EditOutlined />} onClick={() => handleEdit(user)}>Edit</Button>
-          <Button 
-            icon={<QrcodeOutlined />} 
-            onClick={() => handleResendQR(user._id, user.name)}
-            title="Resend QR Code to Email"
-          >
-            Resend QR
-          </Button>
-          <Popconfirm title="Delete user?" onConfirm={() => handleDelete(user._id)} okText="Yes" cancelText="No">
-            <Button icon={<DeleteOutlined />} danger>Delete</Button>
-          </Popconfirm>
-        </Space>
-      ),
+      render: (_, user) => {
+        const actionItems = [
+          {
+            key: 'view',
+            label: 'View Profile',
+            icon: <EyeOutlined />,
+            onClick: () => window.open(`${process.env.REACT_APP_API_URL || ''}/user/${user._id}`, '_blank')
+          },
+          {
+            key: 'edit',
+            label: 'Edit User',
+            icon: <EditOutlined />,
+            onClick: () => handleEdit(user)
+          },
+          {
+            key: 'resend',
+            label: 'Resend QR Code',
+            icon: <QrcodeOutlined />,
+            onClick: () => handleResendQR(user._id, user.name)
+          },
+          {
+            key: 'delete',
+            label: 'Delete User',
+            icon: <DeleteOutlined />,
+            danger: true,
+            onClick: () => handleDelete(user._id)
+          }
+        ];
+
+        return (
+          <Space wrap>
+            {/* Desktop buttons */}
+            <div style={{ display: { xs: 'none', md: 'flex' }, gap: 4 }}>
+              <Tooltip title="View Profile">
+                <Button 
+                  icon={<EyeOutlined />} 
+                  size="small"
+                  onClick={() => window.open(`${process.env.REACT_APP_API_URL || ''}/user/${user._id}`, '_blank')}
+                />
+              </Tooltip>
+              <Tooltip title="Edit User">
+                <Button 
+                  icon={<EditOutlined />} 
+                  size="small"
+                  onClick={() => handleEdit(user)}
+                />
+              </Tooltip>
+              <Tooltip title="Resend QR Code">
+                <Button 
+                  icon={<QrcodeOutlined />} 
+                  size="small"
+                  onClick={() => handleResendQR(user._id, user.name)}
+                />
+              </Tooltip>
+              <Popconfirm 
+                title="Delete user?" 
+                description="This action cannot be undone."
+                onConfirm={() => handleDelete(user._id)} 
+                okText="Yes" 
+                cancelText="No"
+                okType="danger"
+              >
+                <Button icon={<DeleteOutlined />} danger size="small" />
+              </Popconfirm>
+            </div>
+            
+            {/* Mobile dropdown */}
+            <div style={{ display: { xs: 'block', md: 'none' } }}>
+              <Dropdown
+                menu={{ items: actionItems }}
+                trigger={['click']}
+                placement="bottomRight"
+              >
+                <Button icon={<MoreOutlined />} size="small" />
+              </Dropdown>
+            </div>
+          </Space>
+        );
+      },
     },
   ];
 
@@ -196,83 +310,138 @@ export default function ViewAllUsers() {
         />
       </Sider>
       <Layout>
-        <Header style={{ background: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Header style={{ background: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 24px' }}>
           <div>
             <b>{email}</b> <span style={{ color: '#1677ff', marginLeft: 8 }}>[super]</span>
           </div>
           <Button type="primary" danger onClick={logout}>Logout</Button>
         </Header>
-        <Content style={{ margin: 24, background: '#fff', borderRadius: 8, minHeight: 400, padding: 24 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <h2>All Users</h2>
-            <Button 
-              type="primary" 
-              icon={<DownloadOutlined />}
-              onClick={() => {
-                const csvContent = [
-                  ['User ID', 'Name', 'Email', 'Phone Number', 'NIC', 'Profile Picture URL'],
-                  ...users.map(user => [
-                    user._id,
-                    user.name || '',
-                    user.email || '',
-                    user.phoneNumber || '',
-                    user.nic || '',
-                    user.profilePic || ''
-                  ])
-                ].map(row => row.join(',')).join('\n');
-                
-                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                const link = document.createElement('a');
-                const url = URL.createObjectURL(blob);
-                link.setAttribute('href', url);
-                link.setAttribute('download', `all_users_${new Date().toISOString().split('T')[0]}.csv`);
-                link.style.visibility = 'hidden';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-              }}
-            >
-              Export to CSV
-            </Button>
-          </div>
-          <Table columns={columns} dataSource={users} rowKey="_id" loading={loading} />
+        <Content style={{ margin: { xs: 12, md: 24 }, background: '#fff', borderRadius: 8, minHeight: 400, padding: { xs: 16, md: 24 } }}>
+          <Row justify="space-between" align="middle" style={{ marginBottom: 16 }}>
+            <Col>
+              <Title level={3} style={{ margin: 0 }}>All Users</Title>
+            </Col>
+            <Col>
+              <Button 
+                type="primary" 
+                icon={<DownloadOutlined />}
+                onClick={() => {
+                  const csvContent = [
+                    ['User ID', 'Name', 'Email', 'Phone Number', 'NIC', 'Profile Picture URL'],
+                    ...users.map(user => [
+                      user._id,
+                      user.name || '',
+                      user.email || '',
+                      user.phoneNumber || '',
+                      user.nic || '',
+                      user.profilePic || ''
+                    ])
+                  ].map(row => row.join(',')).join('\n');
+                  
+                  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                  const link = document.createElement('a');
+                  const url = URL.createObjectURL(blob);
+                  link.setAttribute('href', url);
+                  link.setAttribute('download', `all_users_${new Date().toISOString().split('T')[0]}.csv`);
+                  link.style.visibility = 'hidden';
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                }}
+              >
+                Export to CSV
+              </Button>
+            </Col>
+          </Row>
+          
+          <Table 
+            columns={columns} 
+            dataSource={users} 
+            rowKey="_id" 
+            loading={loading}
+            scroll={{ x: 800 }}
+            pagination={{
+              showSizeChanger: true,
+              showQuickJumper: true,
+              showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} users`,
+              pageSizeOptions: ['10', '20', '50', '100']
+            }}
+            size="middle"
+          />
+          
           <Modal
             title="Edit User"
             open={editModalVisible}
             onCancel={handleEditModalClose}
             onOk={handleEditSubmit}
             okText="Save"
+            width={600}
+            destroyOnClose
           >
-            <form onSubmit={e => { e.preventDefault(); handleEditSubmit(); }} autoComplete="off">
-              <div style={{ marginBottom: 16 }}>
-                <label>Name *</label><br />
-                <input name="name" value={editForm.name} onChange={handleEditInputChange} style={{ width: '100%', padding: 8 }} />
-                {editErrors.name && <div style={{ color: 'red' }}>{editErrors.name}</div>}
-              </div>
-              <div style={{ marginBottom: 16 }}>
-                <label>Email *</label><br />
-                <input name="email" type="email" value={editForm.email} onChange={handleEditInputChange} style={{ width: '100%', padding: 8 }} />
-                {editErrors.email && <div style={{ color: 'red' }}>{editErrors.email}</div>}
-              </div>
-              <div style={{ marginBottom: 16 }}>
-                <label>Phone Number *</label><br />
-                <input name="phoneNumber" value={editForm.phoneNumber} onChange={handleEditInputChange} style={{ width: '100%', padding: 8 }} />
-                {editErrors.phoneNumber && <div style={{ color: 'red' }}>{editErrors.phoneNumber}</div>}
-              </div>
-              <div style={{ marginBottom: 16 }}>
-                <label>NIC *</label><br />
-                <input name="nic" value={editForm.nic} onChange={handleEditInputChange} style={{ width: '100%', padding: 8 }} />
-                {editErrors.nic && <div style={{ color: 'red' }}>{editErrors.nic}</div>}
-              </div>
-              <div style={{ marginBottom: 16 }}>
-                <label>Profile Photo</label><br />
-                <input type="file" accept="image/*" onChange={handleEditFileChange} />
-                {editPreview && <Avatar src={editPreview} size={64} style={{ marginTop: 8 }} />}
-              </div>
-              <button type="submit" style={{ padding: '8px 24px', background: '#1677ff', color: '#fff', border: 'none', borderRadius: 4 }}>
-                Save
-              </button>
-            </form>
+            <Form
+              form={editForm}
+              layout="vertical"
+              autoComplete="off"
+            >
+              <Row gutter={16}>
+                <Col xs={24} md={12}>
+                  <Form.Item
+                    label="Name"
+                    name="name"
+                    rules={[{ required: true, message: 'Please enter name' }]}
+                  >
+                    <Input placeholder="Enter name" />
+                  </Form.Item>
+                </Col>
+                <Col xs={24} md={12}>
+                  <Form.Item
+                    label="Email"
+                    name="email"
+                    rules={[
+                      { required: true, message: 'Please enter email' },
+                      { type: 'email', message: 'Please enter a valid email' }
+                    ]}
+                  >
+                    <Input placeholder="Enter email" />
+                  </Form.Item>
+                </Col>
+              </Row>
+              
+              <Row gutter={16}>
+                <Col xs={24} md={12}>
+                  <Form.Item
+                    label="Phone Number"
+                    name="phoneNumber"
+                    rules={[{ required: true, message: 'Please enter phone number' }]}
+                  >
+                    <Input placeholder="Enter phone number" />
+                  </Form.Item>
+                </Col>
+                <Col xs={24} md={12}>
+                  <Form.Item
+                    label="NIC"
+                    name="nic"
+                    rules={[{ required: true, message: 'Please enter NIC' }]}
+                  >
+                    <Input placeholder="Enter NIC" />
+                  </Form.Item>
+                </Col>
+              </Row>
+              
+              <Form.Item label="Profile Photo">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={handleEditFileChange}
+                    style={{ flex: 1 }}
+                  />
+                  {editPreview && (
+                    <Avatar src={editPreview} size={64} icon={<UserOutlined />} />
+                  )}
+                </div>
+              </Form.Item>
+            </Form>
           </Modal>
         </Content>
       </Layout>
