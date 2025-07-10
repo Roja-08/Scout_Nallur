@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Button, Popconfirm, Modal, message, Avatar, Space, Layout, Menu, Form, Input, Upload, Row, Col, Card, Typography, Tooltip, Dropdown } from 'antd';
-import { EditOutlined, DeleteOutlined, EyeOutlined, QrcodeOutlined, DownloadOutlined, MoreOutlined, UserOutlined, UploadOutlined } from '@ant-design/icons';
+import { Table, Button, Popconfirm, Modal, message, Avatar, Space, Layout, Menu, Form, Input, Row, Col, Typography, Tooltip, Dropdown } from 'antd';
+import { EditOutlined, DeleteOutlined, EyeOutlined, QrcodeOutlined, DownloadOutlined, MoreOutlined, UserOutlined } from '@ant-design/icons';
 import { logout } from '../utils/auth';
 import { useNavigate } from 'react-router-dom';
 import { uploadToCloudinary } from '../utils/cloudinary';
@@ -14,7 +14,7 @@ export default function ViewAllUsers() {
   const [editingUser, setEditingUser] = useState(null);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editForm] = Form.useForm();
-  const [editErrors, setEditErrors] = useState({});
+
   const email = localStorage.getItem('adminEmail') || 'Super Admin';
   const navigate = useNavigate();
   const [editProfilePic, setEditProfilePic] = useState(null);
@@ -69,13 +69,11 @@ export default function ViewAllUsers() {
       phoneNumber: user.phoneNumber || '',
       nic: user.nic || ''
     });
-    setEditErrors({});
   };
 
   const handleEditModalClose = () => {
     setEditModalVisible(false);
     editForm.resetFields();
-    setEditErrors({});
   };
 
   const handleEditFileChange = e => {
@@ -108,18 +106,14 @@ export default function ViewAllUsers() {
       } else {
         message.error(data.message || 'Failed to update user');
       }
-    } catch (err) {
-      if (err.errorFields) {
-        // Form validation errors
-        const errors = {};
-        err.errorFields.forEach(field => {
-          errors[field.name[0]] = field.errors[0];
-        });
-        setEditErrors(errors);
-      } else {
-        message.error('Failed to update user');
+          } catch (err) {
+        if (err.errorFields) {
+          // Form validation errors - Ant Design Form handles these automatically
+          message.error('Please check the form fields');
+        } else {
+          message.error('Failed to update user');
+        }
       }
-    }
   };
 
   const handleResendQR = async (userId, userName) => {
