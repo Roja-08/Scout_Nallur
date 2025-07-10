@@ -1,10 +1,10 @@
 import React from 'react';
-import { Layout, Typography, Button, Row, Col, Card, Steps, Space } from 'antd';
-import { SafetyOutlined, UserOutlined, TeamOutlined, ClockCircleOutlined, QrcodeOutlined, LockOutlined } from '@ant-design/icons';
+import { Layout, Typography, Button, Row, Col, Steps, Space } from 'antd';
+import { SafetyOutlined, UserOutlined, ClockCircleOutlined, QrcodeOutlined, LockOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 
 const { Header, Content, Footer } = Layout;
-const { Title, Paragraph, Text } = Typography;
+const { Title, Paragraph } = Typography;
 
 const steps = [
   {
