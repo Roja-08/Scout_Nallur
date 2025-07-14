@@ -604,7 +604,7 @@ function AddUserPage() {
   );
 }
 
-// Change useQrScanner to a React component
+// Move QrScanner definition above its first usage
 function QrScanner({ onScan }) {
   return (
     <div style={{ maxWidth: 350, margin: '0 auto', marginBottom: 16 }}>
