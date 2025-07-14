@@ -154,31 +154,6 @@ export default function ViewAllUsers() {
   // Enhanced mobile responsive columns
   const columns = [
     { 
-      title: 'User Info', 
-      key: 'userInfo',
-      responsive: ['md'],
-      render: (_, user) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <Avatar src={user.profilePic} size={48} icon={<UserOutlined />} />
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 4 }}>{user.name}</div>
-            <div style={{ fontSize: 12, color: '#666', marginBottom: 2 }}>
-              <MailOutlined style={{ marginRight: 4 }} />
-              {user.email}
-            </div>
-            <div style={{ fontSize: 12, color: '#666', marginBottom: 2 }}>
-              <PhoneOutlined style={{ marginRight: 4 }} />
-              {user.phoneNumber}
-            </div>
-            <div style={{ fontSize: 12, color: '#666' }}>
-              <IdcardOutlined style={{ marginRight: 4 }} />
-              {user.nic}
-            </div>
-          </div>
-        </div>
-      )
-    },
-    { 
       title: 'ID', 
       dataIndex: '_id', 
       key: '_id',
@@ -230,25 +205,25 @@ export default function ViewAllUsers() {
           {
             key: 'view',
             label: 'View Profile',
-            icon: <EyeOutlined />,
+            icon: <EyeOutlined />, 
             onClick: () => window.open(`${process.env.REACT_APP_API_URL || ''}/user/${user._id}`, '_blank')
           },
           {
             key: 'edit',
             label: 'Edit User',
-            icon: <EditOutlined />,
+            icon: <EditOutlined />, 
             onClick: () => handleEdit(user)
           },
           {
             key: 'resend',
             label: 'Resend QR Code',
-            icon: <QrcodeOutlined />,
+            icon: <QrcodeOutlined />, 
             onClick: () => handleResendQR(user._id, user.name)
           },
           {
             key: 'delete',
             label: 'Delete User',
-            icon: <DeleteOutlined />,
+            icon: <DeleteOutlined />, 
             danger: true,
             onClick: () => handleDelete(user._id)
           }
@@ -290,7 +265,6 @@ export default function ViewAllUsers() {
                 <Button icon={<DeleteOutlined />} danger size="small" />
               </Popconfirm>
             </div>
-            
             {/* Mobile dropdown */}
             <div style={{ display: { xs: 'block', md: 'none' } }}>
               <Dropdown

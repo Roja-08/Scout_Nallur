@@ -637,6 +637,7 @@ function SecondaryAdminUpdateDuty() {
   const [errorMsg, setErrorMsg] = React.useState('');
   const [date, setDate] = React.useState(dayjs().format('YYYY-MM-DD'));
   const [attendance, setAttendance] = React.useState([]);
+  const [showScanner, setShowScanner] = React.useState(false);
 
   React.useEffect(() => {
     async function fetchUsers() {
@@ -940,7 +941,10 @@ function SecondaryAdminUpdateDuty() {
               <Table columns={attendanceColumns} dataSource={attendance} rowKey="date" />
             </div>
           )}
-          <QrScannerComponent onScan={handleQrScan} />
+          <Button onClick={() => setShowScanner(s => !s)} style={{ marginBottom: 16 }}>
+            {showScanner ? 'Hide' : 'Show'} QR Scanner
+          </Button>
+          {showScanner && <QrScannerComponent onScan={handleQrScan} />}
         </Content>
       </Layout>
     </Layout>
@@ -962,6 +966,7 @@ function SuperAdminUpdateDuty() {
   const [attendance, setAttendance] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
   const [updating, setUpdating] = React.useState(false);
+  const [showScanner, setShowScanner] = React.useState(false);
 
   React.useEffect(() => {
     async function fetchUsers() {
@@ -1376,7 +1381,10 @@ function SuperAdminUpdateDuty() {
               />
             </div>
           )}
-          <QrScannerComponent onScan={handleQrScan} />
+          <Button onClick={() => setShowScanner(s => !s)} style={{ marginBottom: 16 }}>
+            {showScanner ? 'Hide' : 'Show'} QR Scanner
+          </Button>
+          {showScanner && <QrScannerComponent onScan={handleQrScan} />}
         </Content>
       </Layout>
     </Layout>
