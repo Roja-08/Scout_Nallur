@@ -865,6 +865,7 @@ function SecondaryAdminUpdateDuty() {
           });
           setComingTime(now);
           setSuccessMsg('Coming time updated automatically!');
+          setShowScanner(false);
         } else if (todayRecord.comingTime && !todayRecord.finishingTime) {
           // Auto-update finishing time
           const now = dayjs().format('HH:mm');
@@ -878,8 +879,10 @@ function SecondaryAdminUpdateDuty() {
           });
           setFinishingTime(now);
           setSuccessMsg('Finishing time updated automatically!');
+          setShowScanner(false);
         } else {
           setSuccessMsg('Your attendance is already marked.');
+          setShowScanner(false);
         }
       } else {
         setErrorMsg(data.message || 'User not found');
@@ -1226,6 +1229,7 @@ function SuperAdminUpdateDuty() {
           });
           setComingTime(now);
           message.success('Coming time updated automatically!');
+          setShowScanner(false);
         } else if (todayRecord.comingTime && !todayRecord.finishingTime) {
           // Auto-update finishing time
           const now = dayjs().format('HH:mm');
@@ -1239,8 +1243,10 @@ function SuperAdminUpdateDuty() {
           });
           setFinishingTime(now);
           message.success('Finishing time updated automatically!');
+          setShowScanner(false);
         } else {
           message.info('Your attendance is already marked.');
+          setShowScanner(false);
         }
       } else {
         message.error(data.message || 'User not found');
