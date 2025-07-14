@@ -619,6 +619,7 @@ function QrScannerComponent({ onScan }) {
         onError={handleError}
         onScan={handleScan}
         style={{ width: '100%' }}
+        constraints={{ facingMode: 'environment' }}
       />
     </div>
   );
