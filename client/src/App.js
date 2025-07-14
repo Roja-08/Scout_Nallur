@@ -847,7 +847,7 @@ function SecondaryAdminUpdateDuty() {
           setFinishingTime(now);
           setSuccessMsg('Finishing time updated automatically!');
         } else {
-          setSuccessMsg('Today\'s duty already completed.');
+          setSuccessMsg('Your attendance is already marked.');
         }
       } else {
         setErrorMsg(data.message || 'User not found');
@@ -1143,6 +1143,8 @@ function SuperAdminUpdateDuty() {
           setSelectedUser(userData);
           setAttendance(userData.attendance || []);
         }
+        await fetch(`${process.env.REACT_APP_API_URL || ''}/api/users/${selectedId}/send-finish-email`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } });
+        message.success('Your work is finished as professional.');
       } else {
         message.error(data.message || 'Failed to update finishing time');
       }
@@ -1206,7 +1208,7 @@ function SuperAdminUpdateDuty() {
           setFinishingTime(now);
           message.success('Finishing time updated automatically!');
         } else {
-          message.info('Today\'s duty already completed.');
+          message.info('Your attendance is already marked.');
         }
       } else {
         message.error(data.message || 'User not found');

@@ -222,6 +222,33 @@ router.post('/:id/resend-qr', authMiddleware, requireAnyRole(['super', 'secondar
   }
 });
 
+// Send finish email to user with coming and finishing time
+router.post('/:id/send-finish-email', authMiddleware, requireAnyRole(['super', 'secondary']), async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    const today = new Date().toISOString().slice(0, 10);
+    const todayRecord = (user.attendance || []).find(a => a.date === today);
+    if (!todayRecord || !todayRecord.comingTime || !todayRecord.finishingTime) {
+      return res.status(400).json({ message: 'Attendance for today is incomplete.' });
+    }
+    const emailTemplate = {
+      subject: 'Your work is finished as professional!',
+      html: `<p>Dear ${user.name},<br>Your work for today (${today}) is marked as finished.<br><b>Coming Time:</b> ${todayRecord.comingTime}<br><b>Finishing Time:</b> ${todayRecord.finishingTime}<br>Thank you for your professionalism!</p>`,
+      text: `Dear ${user.name},\nYour work for today (${today}) is marked as finished.\nComing Time: ${todayRecord.comingTime}\nFinishing Time: ${todayRecord.finishingTime}\nThank you for your professionalism!`
+    };
+    await sendEmail({
+      to: user.email,
+      subject: emailTemplate.subject,
+      html: emailTemplate.html,
+      text: emailTemplate.text
+    });
+    res.json({ message: 'Finish email sent successfully' });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
 // Admin-driven user registration (super only) - with professional email
 router.post('/', authMiddleware, requireRole('super'), async (req, res) => {
   console.log('Register API called', req.body, req.user);
