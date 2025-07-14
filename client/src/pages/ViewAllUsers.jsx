@@ -307,84 +307,6 @@ export default function ViewAllUsers() {
     },
   ];
 
-  // Mobile card view for small screens
-  const renderMobileCards = () => (
-    <div style={{ display: { xs: 'block', md: 'none' } }}>
-      {users.map(user => (
-        <Card 
-          key={user._id} 
-          style={{ marginBottom: 16 }}
-          bodyStyle={{ padding: 16 }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-            <Avatar src={user.profilePic} size={48} icon={<UserOutlined />} />
-            <div style={{ flex: 1 }}>
-              <Title level={5} style={{ margin: 0, marginBottom: 4 }}>{user.name}</Title>
-              <Text type="secondary" style={{ fontSize: 12 }}>
-                <MailOutlined style={{ marginRight: 4 }} />
-                {user.email}
-              </Text>
-            </div>
-          </div>
-          
-          <div style={{ marginBottom: 12 }}>
-            <div style={{ marginBottom: 4 }}>
-              <Text type="secondary" style={{ fontSize: 12 }}>
-                <PhoneOutlined style={{ marginRight: 4 }} />
-                {user.phoneNumber}
-              </Text>
-            </div>
-            <div style={{ marginBottom: 4 }}>
-              <Text type="secondary" style={{ fontSize: 12 }}>
-                <IdcardOutlined style={{ marginRight: 4 }} />
-                {user.nic}
-              </Text>
-            </div>
-            <div>
-              <Text code style={{ fontSize: 11 }}>{user._id}</Text>
-            </div>
-          </div>
-          
-          <Divider style={{ margin: '12px 0' }} />
-          
-          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-            <Button 
-              size="small" 
-              icon={<EyeOutlined />}
-              onClick={() => window.open(`${process.env.REACT_APP_API_URL || ''}/user/${user._id}`, '_blank')}
-            >
-              View
-            </Button>
-            <Button 
-              size="small" 
-              icon={<EditOutlined />}
-              onClick={() => handleEdit(user)}
-            >
-              Edit
-            </Button>
-            <Button 
-              size="small" 
-              icon={<QrcodeOutlined />}
-              onClick={() => handleResendQR(user._id, user.name)}
-            >
-              QR
-            </Button>
-            <Popconfirm 
-              title="Delete user?" 
-              description="This action cannot be undone."
-              onConfirm={() => handleDelete(user._id)} 
-              okText="Yes" 
-              cancelText="No"
-              okType="danger"
-            >
-              <Button size="small" icon={<DeleteOutlined />} danger />
-            </Popconfirm>
-          </div>
-        </Card>
-      ))}
-    </div>
-  );
-
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider breakpoint="lg" collapsedWidth="0">
@@ -453,9 +375,6 @@ export default function ViewAllUsers() {
               </Button>
             </Col>
           </Row>
-          
-          {/* Mobile card view */}
-          {renderMobileCards()}
           
           {/* Desktop table view */}
           <div style={{ display: { xs: 'none', md: 'block' } }}>

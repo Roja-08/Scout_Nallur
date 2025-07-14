@@ -10,7 +10,7 @@ import AddUserForm from './components/AddUserForm';
 import UserStatusPage from './pages/UserStatusPage';
 import ViewAllUsers from './pages/ViewAllUsers';
 import { TrophyTwoTone, CrownTwoTone, SmileTwoTone, LikeTwoTone, DownloadOutlined, QrcodeOutlined, EyeOutlined, UserOutlined } from '@ant-design/icons';
-import { QrReader } from '@blackbox-vision/react-qr-reader';
+import QrScanner from 'react-qr-scanner';
 
 dayjs.extend(customParseFormat);
 
@@ -604,17 +604,20 @@ function AddUserPage() {
   );
 }
 
-// Move QrScanner definition above its first usage
-function QrScanner({ onScan }) {
+// Replace QrScanner definition
+function QrScannerComponent({ onScan }) {
+  const handleScan = data => {
+    if (data) onScan(data.text || data);
+  };
+  const handleError = err => {
+    // Optionally handle error
+  };
   return (
     <div style={{ maxWidth: 350, margin: '0 auto', marginBottom: 16 }}>
-      <QrReader
-        constraints={{ facingMode: 'environment' }}
-        onResult={(result, error) => {
-          if (!!result) {
-            onScan(result?.text);
-          }
-        }}
+      <QrScanner
+        delay={300}
+        onError={handleError}
+        onScan={handleScan}
         style={{ width: '100%' }}
       />
     </div>
@@ -937,7 +940,7 @@ function SecondaryAdminUpdateDuty() {
               <Table columns={attendanceColumns} dataSource={attendance} rowKey="date" />
             </div>
           )}
-          <QrScanner onScan={handleQrScan} />
+          <QrScannerComponent onScan={handleQrScan} />
         </Content>
       </Layout>
     </Layout>
@@ -1373,7 +1376,7 @@ function SuperAdminUpdateDuty() {
               />
             </div>
           )}
-          <QrScanner onScan={handleQrScan} />
+          <QrScannerComponent onScan={handleQrScan} />
         </Content>
       </Layout>
     </Layout>
