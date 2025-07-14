@@ -238,12 +238,12 @@ router.post('/', authMiddleware, requireRole('super'), async (req, res) => {
     if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
       age--;
     }
-    // Generate next registration number (ID)
-    let nextId = '2025/101';
-    const last2025User = await User.findOne({ _id: { $regex: '^2025/' } }).sort({ _id: -1 });
+    // Generate next registration number (ID) with dash
+    let nextId = '2025-101';
+    const last2025User = await User.findOne({ _id: { $regex: '^2025-' } }).sort({ _id: -1 });
     if (last2025User) {
-      const [year, idx] = last2025User._id.split('/');
-      nextId = `${year}/${parseInt(idx) + 1}`;
+      const [year, idx] = last2025User._id.split('-');
+      nextId = `${year}-${parseInt(idx) + 1}`;
     }
     const existingUser = await User.findOne({ $or: [{ email }, { phoneNumber }, { _id: nextId }] });
     if (existingUser) {
