@@ -3,7 +3,6 @@ import { uploadToCloudinary } from '../utils/cloudinary';
 
 export default function AddUserForm({ onUserAdded }) {
   const [form, setForm] = useState({
-    id: '',
     name: '',
     email: '',
     phoneNumber: '',
@@ -13,6 +12,7 @@ export default function AddUserForm({ onUserAdded }) {
   const [profilePic, setProfilePic] = useState(null);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const [assignedId, setAssignedId] = useState('');
 
   const handleChange = e => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -24,7 +24,6 @@ export default function AddUserForm({ onUserAdded }) {
 
   const validate = () => {
     const errs = {};
-    if (!form.id) errs.id = 'Please enter ID';
     if (!form.name) errs.name = 'Please enter Name';
     if (!form.email) errs.email = 'Please enter Email';
     if (!form.phoneNumber) errs.phoneNumber = 'Please enter Phone Number';
@@ -56,7 +55,8 @@ export default function AddUserForm({ onUserAdded }) {
       const data = await res.json();
       if (res.ok) {
         alert('User added!');
-        setForm({ id: '', name: '', email: '', phoneNumber: '', nic: '', password: '' });
+        setAssignedId(data.user._id);
+        setForm({ name: '', email: '', phoneNumber: '', nic: '', password: '' });
         setProfilePic(null);
         setErrors({});
         if (onUserAdded) onUserAdded(data.user);
@@ -74,11 +74,12 @@ export default function AddUserForm({ onUserAdded }) {
     <div style={{ maxWidth: 600, margin: '0 auto', background: '#fff', borderRadius: 8, padding: 24, boxShadow: '0 2px 12px #e6f7ff' }}>
       <h2>Add New User</h2>
       <form onSubmit={onSubmit} autoComplete="off">
-        <div style={{ marginBottom: 16 }}>
-          <label>ID *</label><br />
-          <input name="id" value={form.id} onChange={handleChange} style={{ width: '100%', padding: 8 }} />
-          {errors.id && <div style={{ color: 'red' }}>{errors.id}</div>}
-        </div>
+        {assignedId && (
+          <div style={{ marginBottom: 16 }}>
+            <label>Assigned ID</label><br />
+            <input name="id" value={assignedId} readOnly style={{ width: '100%', padding: 8, background: '#f5f5f5' }} />
+          </div>
+        )}
         <div style={{ marginBottom: 16 }}>
           <label>Name *</label><br />
           <input name="name" value={form.name} onChange={handleChange} style={{ width: '100%', padding: 8 }} />

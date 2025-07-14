@@ -218,29 +218,32 @@ router.post('/:id/resend-qr', authMiddleware, requireAnyRole(['super', 'secondar
 router.post('/', authMiddleware, requireRole('super'), async (req, res) => {
   console.log('Register API called', req.body, req.user);
   try {
-    const { id, name, email, phoneNumber, password, nic, profilePic } = req.body;
-    if (!id || !name || !email || !phoneNumber || !password || !nic) {
+    const { name, email, phoneNumber, password, nic, profilePic } = req.body;
+    if (!name || !email || !phoneNumber || !password || !nic) {
       return res.status(400).json({ message: 'All fields are required' });
     }
-    const existingUser = await User.findOne({ $or: [{ email }, { phoneNumber }, { _id: id }] });
+    // Generate next registration number (ID)
+    let nextId = '2025/101';
+    const last2025User = await User.findOne({ _id: { $regex: '^2025/' } }).sort({ _id: -1 });
+    if (last2025User) {
+      const [year, idx] = last2025User._id.split('/');
+      nextId = `${year}/${parseInt(idx) + 1}`;
+    }
+    const existingUser = await User.findOne({ $or: [{ email }, { phoneNumber }, { _id: nextId }] });
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists' });
     }
     const hashedPassword = await require('bcryptjs').hash(password, 10);
-    
     // Create the user
-    const user = new User({ _id: id, name, email, phoneNumber, password: hashedPassword, nic, profilePic });
+    const user = new User({ _id: nextId, name, email, phoneNumber, password: hashedPassword, nic, profilePic });
     await user.save();
-    
     // Generate QR code with the real user ID
     const baseUrl = process.env.PUBLIC_BASE_URL || 'http://localhost:3000';
     const qrCodeUrl = `${baseUrl}/user/${user._id}`;
     const qrCode = await QRCode.toDataURL(qrCodeUrl);
-    
     // Update user with QR code
     user.qrCode = qrCode;
     await user.save();
-    
     // Send professional registration email with QR code
     try {
       const emailTemplate = emailTemplates.registration(user.toObject(), qrCode);
@@ -262,7 +265,6 @@ router.post('/', authMiddleware, requireRole('super'), async (req, res) => {
       console.error('Failed to send registration email:', emailError.message);
       // Don't fail the request if email fails
     }
-    
     res.status(201).json({ message: 'User registered successfully', user });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
