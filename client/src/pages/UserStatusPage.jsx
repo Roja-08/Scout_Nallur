@@ -127,11 +127,12 @@ export default function UserStatusPage() {
 
   if (loading) return <Spin style={{ display: 'block', margin: '80px auto' }} />;
   if (error) return <Alert type="error" message={error} style={{ margin: 40 }} />;
+  if (!user) return <Alert type="error" message="User not found or data missing." style={{ margin: 40 }} />;
 
-  const totalDutyTime = calculateTotalDutyTime(user.attendance, userId);
-  const workingStatus = getWorkingStatus(user.attendance);
+  const totalDutyTime = calculateTotalDutyTime(user?.attendance || [], userId);
+  const workingStatus = getWorkingStatus(user?.attendance || []);
   const userIsTopLeader = isTopLeader(userId, topLeaders);
-  const isActive = isUserActiveToday(user.attendance);
+  const isActive = isUserActiveToday(user?.attendance || []);
   const trophyIcons = [
     <CrownTwoTone twoToneColor="#FFD700" style={{ fontSize: 20 }} />, // Gold
     <TrophyTwoTone twoToneColor="#C0C0C0" style={{ fontSize: 20 }} />, // Silver
