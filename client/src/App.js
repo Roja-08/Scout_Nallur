@@ -604,7 +604,8 @@ function AddUserPage() {
   );
 }
 
-function useQrScanner({ onScan }) {
+// Change useQrScanner to a React component
+function QrScanner({ onScan }) {
   return (
     <div style={{ maxWidth: 350, margin: '0 auto', marginBottom: 16 }}>
       <QrReader
@@ -936,7 +937,7 @@ function SecondaryAdminUpdateDuty() {
               <Table columns={attendanceColumns} dataSource={attendance} rowKey="date" />
             </div>
           )}
-          {useQrScanner({ onScan: handleQrScan })}
+          <QrScanner onScan={handleQrScan} />
         </Content>
       </Layout>
     </Layout>
@@ -1372,7 +1373,7 @@ function SuperAdminUpdateDuty() {
               />
             </div>
           )}
-          {useQrScanner({ onScan: handleQrScan })}
+          <QrScanner onScan={handleQrScan} />
         </Content>
       </Layout>
     </Layout>
