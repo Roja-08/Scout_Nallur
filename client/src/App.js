@@ -10,6 +10,7 @@ import AddUserForm from './components/AddUserForm';
 import UserStatusPage from './pages/UserStatusPage';
 import ViewAllUsers from './pages/ViewAllUsers';
 import { TrophyTwoTone, CrownTwoTone, SmileTwoTone, LikeTwoTone, DownloadOutlined, QrcodeOutlined, EyeOutlined, UserOutlined } from '@ant-design/icons';
+import { QrReader } from '@blackbox-vision/react-qr-reader';
 
 dayjs.extend(customParseFormat);
 
@@ -603,6 +604,22 @@ function AddUserPage() {
   );
 }
 
+function useQrScanner({ onScan }) {
+  return (
+    <div style={{ maxWidth: 350, margin: '0 auto', marginBottom: 16 }}>
+      <QrReader
+        constraints={{ facingMode: 'environment' }}
+        onResult={(result, error) => {
+          if (!!result) {
+            onScan(result?.text);
+          }
+        }}
+        style={{ width: '100%' }}
+      />
+    </div>
+  );
+}
+
 function SecondaryAdminUpdateDuty() {
   useSessionTimeout();
   const email = localStorage.getItem('adminEmail') || 'Secondary Admin';
@@ -616,6 +633,8 @@ function SecondaryAdminUpdateDuty() {
   const [errorMsg, setErrorMsg] = React.useState('');
   const [date, setDate] = React.useState(dayjs().format('YYYY-MM-DD'));
   const [attendance, setAttendance] = React.useState([]);
+  // Add state for QR scan
+  const [qrScanLoading, setQrScanLoading] = React.useState(false);
 
   React.useEffect(() => {
     async function fetchUsers() {
@@ -777,6 +796,66 @@ function SecondaryAdminUpdateDuty() {
     },
   ];
 
+  const handleQrScan = async (scannedText) => {
+    if (!scannedText) return;
+    setQrScanLoading(true);
+    // Assume QR code contains the user profile link or just the user ID
+    let userId = scannedText;
+    // If QR code is a URL, extract the user ID
+    const match = scannedText.match(/\/user\/([\w-]+)/);
+    if (match) userId = match[1];
+    setSelectedId(userId);
+    // Fetch user details and auto-update coming/finishing time
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${API_URL}/api/users/${userId}`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setSelectedUser(data);
+        setAttendance(data.attendance || []);
+        const today = dayjs().format('YYYY-MM-DD');
+        const todayRecord = (data.attendance || []).find(a => a.date === today);
+        if (!todayRecord || !todayRecord.comingTime) {
+          // Auto-update coming time
+          const now = dayjs().format('HH:mm');
+          await fetch(`${API_URL}/api/users/${userId}/duty`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({ date: today, comingTime: now }),
+          });
+          setComingTime(now);
+          setSuccessMsg('Coming time updated automatically!');
+        } else if (todayRecord.comingTime && !todayRecord.finishingTime) {
+          // Auto-update finishing time
+          const now = dayjs().format('HH:mm');
+          await fetch(`${API_URL}/api/users/${userId}/duty`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({ date: today, finishingTime: now }),
+          });
+          setFinishingTime(now);
+          setSuccessMsg('Finishing time updated automatically!');
+        } else {
+          setSuccessMsg('Today\'s duty already completed.');
+        }
+      } else {
+        setErrorMsg(data.message || 'User not found');
+      }
+    } catch (err) {
+      setErrorMsg('Failed to fetch user details');
+    } finally {
+      setQrScanLoading(false);
+    }
+  };
+
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider breakpoint="lg" collapsedWidth="0">
@@ -860,6 +939,7 @@ function SecondaryAdminUpdateDuty() {
               <Table columns={attendanceColumns} dataSource={attendance} rowKey="date" />
             </div>
           )}
+          {useQrScanner({ onScan: handleQrScan })}
         </Content>
       </Layout>
     </Layout>
@@ -881,6 +961,8 @@ function SuperAdminUpdateDuty() {
   const [attendance, setAttendance] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
   const [updating, setUpdating] = React.useState(false);
+  // Add state for QR scan
+  const [qrScanLoading, setQrScanLoading] = React.useState(false);
 
   React.useEffect(() => {
     async function fetchUsers() {
@@ -1072,6 +1154,66 @@ function SuperAdminUpdateDuty() {
     { title: 'Finishing Time', dataIndex: 'finishingTime', key: 'finishingTime' },
   ];
 
+  const handleQrScan = async (scannedText) => {
+    if (!scannedText) return;
+    setQrScanLoading(true);
+    // Assume QR code contains the user profile link or just the user ID
+    let userId = scannedText;
+    // If QR code is a URL, extract the user ID
+    const match = scannedText.match(/\/user\/([\w-]+)/);
+    if (match) userId = match[1];
+    setSelectedId(userId);
+    // Fetch user details and auto-update coming/finishing time
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${process.env.REACT_APP_API_URL || ''}/api/users/${userId}`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setSelectedUser(data);
+        setAttendance(data.attendance || []);
+        const today = dayjs().format('YYYY-MM-DD');
+        const todayRecord = (data.attendance || []).find(a => a.date === today);
+        if (!todayRecord || !todayRecord.comingTime) {
+          // Auto-update coming time
+          const now = dayjs().format('HH:mm');
+          await fetch(`${process.env.REACT_APP_API_URL || ''}/api/users/${userId}/duty`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({ date: today, comingTime: now }),
+          });
+          setComingTime(now);
+          message.success('Coming time updated automatically!');
+        } else if (todayRecord.comingTime && !todayRecord.finishingTime) {
+          // Auto-update finishing time
+          const now = dayjs().format('HH:mm');
+          await fetch(`${process.env.REACT_APP_API_URL || ''}/api/users/${userId}/duty`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({ date: today, finishingTime: now }),
+          });
+          setFinishingTime(now);
+          message.success('Finishing time updated automatically!');
+        } else {
+          message.info('Today\'s duty already completed.');
+        }
+      } else {
+        message.error(data.message || 'User not found');
+      }
+    } catch (err) {
+      message.error('Failed to fetch user details');
+    } finally {
+      setQrScanLoading(false);
+    }
+  };
+
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider breakpoint="lg" collapsedWidth="0">
@@ -1236,6 +1378,7 @@ function SuperAdminUpdateDuty() {
               />
             </div>
           )}
+          {useQrScanner({ onScan: handleQrScan })}
         </Content>
       </Layout>
     </Layout>
