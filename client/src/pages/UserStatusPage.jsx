@@ -28,6 +28,8 @@ export default function UserStatusPage() {
       setLoading(true);
       setError('');
       try {
+        // Debug: Log API URL
+        console.log('API URL:', process.env.REACT_APP_API_URL);
         // Fetch user data
         const userRes = await fetch(`${process.env.REACT_APP_API_URL || ''}/api/users/public/${userId}`);
         if (!userRes.ok) throw new Error('User not found');
@@ -43,6 +45,8 @@ export default function UserStatusPage() {
           console.error('Failed to fetch leaderboard data');
         }
       } catch (err) {
+        // Debug: Log error to browser console
+        console.error('Error in UserStatusPage fetchData:', err);
         setError('User not found or server error');
       } finally {
         setLoading(false);
