@@ -8,14 +8,27 @@ export default function AddUserForm({ onUserAdded }) {
     phoneNumber: '',
     nic: '',
     password: '',
+    dateOfBirth: '',
+    school: '',
   });
   const [profilePic, setProfilePic] = useState(null);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [assignedId, setAssignedId] = useState('');
+  const [age, setAge] = useState('');
 
   const handleChange = e => {
     setForm({ ...form, [e.target.name]: e.target.value });
+    if (e.target.name === 'dateOfBirth') {
+      const dob = new Date(e.target.value);
+      const today = new Date();
+      let calculatedAge = today.getFullYear() - dob.getFullYear();
+      const m = today.getMonth() - dob.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+        calculatedAge--;
+      }
+      setAge(calculatedAge > 0 ? calculatedAge : '');
+    }
   };
 
   const handleFileChange = e => {
@@ -29,6 +42,8 @@ export default function AddUserForm({ onUserAdded }) {
     if (!form.phoneNumber) errs.phoneNumber = 'Please enter Phone Number';
     if (!form.nic) errs.nic = 'Please enter NIC';
     if (!form.password) errs.password = 'Please enter Password';
+    if (!form.dateOfBirth) errs.dateOfBirth = 'Please enter Date of Birth';
+    if (!form.school) errs.school = 'Please enter School';
     return errs;
   };
 
@@ -56,7 +71,8 @@ export default function AddUserForm({ onUserAdded }) {
       if (res.ok) {
         alert('User added!');
         setAssignedId(data.user._id);
-        setForm({ name: '', email: '', phoneNumber: '', nic: '', password: '' });
+        setForm({ name: '', email: '', phoneNumber: '', nic: '', password: '', dateOfBirth: '', school: '' });
+        setAge('');
         setProfilePic(null);
         setErrors({});
         if (onUserAdded) onUserAdded(data.user);
@@ -104,6 +120,20 @@ export default function AddUserForm({ onUserAdded }) {
           <label>Password *</label><br />
           <input name="password" type="password" value={form.password} onChange={handleChange} style={{ width: '100%', padding: 8 }} />
           {errors.password && <div style={{ color: 'red' }}>{errors.password}</div>}
+        </div>
+        <div style={{ marginBottom: 16 }}>
+          <label>Date of Birth *</label><br />
+          <input name="dateOfBirth" type="date" value={form.dateOfBirth} onChange={handleChange} style={{ width: '100%', padding: 8 }} />
+          {errors.dateOfBirth && <div style={{ color: 'red' }}>{errors.dateOfBirth}</div>}
+        </div>
+        <div style={{ marginBottom: 16 }}>
+          <label>Age</label><br />
+          <input name="age" value={age} readOnly style={{ width: '100%', padding: 8, background: '#f5f5f5' }} />
+        </div>
+        <div style={{ marginBottom: 16 }}>
+          <label>School *</label><br />
+          <input name="school" value={form.school} onChange={handleChange} style={{ width: '100%', padding: 8 }} />
+          {errors.school && <div style={{ color: 'red' }}>{errors.school}</div>}
         </div>
         <div style={{ marginBottom: 16 }}>
           <label>Profile Photo</label><br />

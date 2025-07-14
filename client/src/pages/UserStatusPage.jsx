@@ -169,6 +169,9 @@ export default function UserStatusPage() {
             <Descriptions.Item label="Email">{user.email}</Descriptions.Item>
             <Descriptions.Item label="Phone Number">{user.phoneNumber}</Descriptions.Item>
             <Descriptions.Item label="NIC">{user.nic}</Descriptions.Item>
+            <Descriptions.Item label="Date of Birth">{user.dateOfBirth ? new Date(user.dateOfBirth).toLocaleDateString() : '-'}</Descriptions.Item>
+            <Descriptions.Item label="Age">{user.age || '-'}</Descriptions.Item>
+            <Descriptions.Item label="School">{user.school || '-'}</Descriptions.Item>
             <Descriptions.Item label="Registration Time">{new Date(user.registrationTime).toLocaleString()}</Descriptions.Item>
           </Descriptions>
         </Card>

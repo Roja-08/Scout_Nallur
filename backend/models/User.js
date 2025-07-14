@@ -12,6 +12,9 @@ const UserSchema = new mongoose.Schema({
   qrCode: { type: String },
   nic: { type: String, required: true },
   profilePic: { type: String },
+  dateOfBirth: { type: Date },
+  age: { type: Number },
+  school: { type: String },
   attendance: [
     {
       date: { type: String }, // e.g., '2024-06-30'

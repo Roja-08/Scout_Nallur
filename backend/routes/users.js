@@ -79,21 +79,28 @@ router.put('/:id/duty', authMiddleware, requireAnyRole(['super', 'secondary']), 
 // Edit user (admin only) - with email notification
 router.put('/:id', authMiddleware, requireAnyRole(['super', 'secondary']), async (req, res) => {
   try {
-    const { name, email, phoneNumber, nic, profilePic } = req.body;
-    
+    const { name, email, phoneNumber, nic, profilePic, dateOfBirth, school } = req.body;
     // Get the original user data before update
     const originalUser = await User.findById(req.params.id);
     if (!originalUser) return res.status(404).json({ message: 'User not found' });
-    
+    // Calculate age if dateOfBirth is provided
+    let age = originalUser.age;
+    if (dateOfBirth) {
+      const dob = new Date(dateOfBirth);
+      const today = new Date();
+      age = today.getFullYear() - dob.getFullYear();
+      const m = today.getMonth() - dob.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+        age--;
+      }
+    }
     // Update the user
     const updatedUser = await User.findByIdAndUpdate(
       req.params.id,
-      { name, email, phoneNumber, nic, profilePic },
+      { name, email, phoneNumber, nic, profilePic, dateOfBirth, age, school },
       { new: true }
     );
-    
     if (!updatedUser) return res.status(404).json({ message: 'User not found' });
-    
     // Determine what fields were actually changed
     const updatedFields = {};
     if (name !== originalUser.name) updatedFields.name = name;
@@ -101,7 +108,9 @@ router.put('/:id', authMiddleware, requireAnyRole(['super', 'secondary']), async
     if (phoneNumber !== originalUser.phoneNumber) updatedFields.phoneNumber = phoneNumber;
     if (nic !== originalUser.nic) updatedFields.nic = nic;
     if (profilePic !== originalUser.profilePic) updatedFields.profilePic = 'Updated';
-    
+    if (dateOfBirth && dateOfBirth !== originalUser.dateOfBirth?.toISOString()) updatedFields.dateOfBirth = dateOfBirth;
+    if (school !== originalUser.school) updatedFields.school = school;
+    if (age !== originalUser.age) updatedFields.age = age;
     // Send email notification if any fields were changed
     if (Object.keys(updatedFields).length > 0) {
       try {
@@ -118,7 +127,6 @@ router.put('/:id', authMiddleware, requireAnyRole(['super', 'secondary']), async
         // Don't fail the request if email fails
       }
     }
-    
     res.json(updatedUser);
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
@@ -218,9 +226,17 @@ router.post('/:id/resend-qr', authMiddleware, requireAnyRole(['super', 'secondar
 router.post('/', authMiddleware, requireRole('super'), async (req, res) => {
   console.log('Register API called', req.body, req.user);
   try {
-    const { name, email, phoneNumber, password, nic, profilePic } = req.body;
-    if (!name || !email || !phoneNumber || !password || !nic) {
+    const { name, email, phoneNumber, password, nic, profilePic, dateOfBirth, school } = req.body;
+    if (!name || !email || !phoneNumber || !password || !nic || !dateOfBirth || !school) {
       return res.status(400).json({ message: 'All fields are required' });
+    }
+    // Calculate age from dateOfBirth
+    const dob = new Date(dateOfBirth);
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const m = today.getMonth() - dob.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+      age--;
     }
     // Generate next registration number (ID)
     let nextId = '2025/101';
@@ -235,7 +251,7 @@ router.post('/', authMiddleware, requireRole('super'), async (req, res) => {
     }
     const hashedPassword = await require('bcryptjs').hash(password, 10);
     // Create the user
-    const user = new User({ _id: nextId, name, email, phoneNumber, password: hashedPassword, nic, profilePic });
+    const user = new User({ _id: nextId, name, email, phoneNumber, password: hashedPassword, nic, profilePic, dateOfBirth: dob, age, school });
     await user.save();
     // Generate QR code with the real user ID
     const baseUrl = process.env.PUBLIC_BASE_URL || 'http://localhost:3000';
