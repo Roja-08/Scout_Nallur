@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { ConfigProvider, Layout, Menu, Button, Card, Row, Col, Statistic, List, Avatar, Table, DatePicker, message, Space, Form, Input, Select, Typography, Alert } from 'antd';
 import Home from './pages/Home';
@@ -606,20 +606,52 @@ function AddUserPage() {
 
 // Replace QrScanner definition
 function QrScannerComponent({ onScan }) {
+  const [devices, setDevices] = useState([]);
+  const [selectedDeviceId, setSelectedDeviceId] = useState('');
+
+  useEffect(() => {
+    async function getDevices() {
+      if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+        const allDevices = await navigator.mediaDevices.enumerateDevices();
+        const videoDevices = allDevices.filter(d => d.kind === 'videoinput');
+        setDevices(videoDevices);
+        // Default: back camera on mobile, front on desktop
+        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        let preferred = videoDevices[0]?.deviceId || '';
+        for (const d of videoDevices) {
+          if (isMobile && d.label.toLowerCase().includes('back')) preferred = d.deviceId;
+          if (!isMobile && d.label.toLowerCase().includes('front')) preferred = d.deviceId;
+        }
+        setSelectedDeviceId(preferred);
+      }
+    }
+    getDevices();
+  }, []);
+
   const handleScan = data => {
     if (data) onScan(data.text || data);
   };
   const handleError = err => {
     // Optionally handle error
   };
+
   return (
     <div style={{ maxWidth: 350, margin: '0 auto', marginBottom: 16 }}>
+      {devices.length > 1 && (
+        <select value={selectedDeviceId} onChange={e => setSelectedDeviceId(e.target.value)} style={{ marginBottom: 8, width: '100%' }}>
+          {devices.map(d => (
+            <option key={d.deviceId} value={d.deviceId}>{d.label || `Camera ${d.deviceId}`}</option>
+          ))}
+        </select>
+      )}
       <QrScanner
         delay={300}
         onError={handleError}
         onScan={handleScan}
         style={{ width: '100%' }}
-        constraints={{ facingMode: 'environment' }}
+        constraints={{
+          video: selectedDeviceId ? { deviceId: { exact: selectedDeviceId } } : { facingMode: /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ? 'environment' : 'user' }
+        }}
       />
     </div>
   );
