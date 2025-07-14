@@ -633,8 +633,6 @@ function SecondaryAdminUpdateDuty() {
   const [errorMsg, setErrorMsg] = React.useState('');
   const [date, setDate] = React.useState(dayjs().format('YYYY-MM-DD'));
   const [attendance, setAttendance] = React.useState([]);
-  // Add state for QR scan
-  const [qrScanLoading, setQrScanLoading] = React.useState(false);
 
   React.useEffect(() => {
     async function fetchUsers() {
@@ -798,7 +796,6 @@ function SecondaryAdminUpdateDuty() {
 
   const handleQrScan = async (scannedText) => {
     if (!scannedText) return;
-    setQrScanLoading(true);
     // Assume QR code contains the user profile link or just the user ID
     let userId = scannedText;
     // If QR code is a URL, extract the user ID
@@ -852,7 +849,7 @@ function SecondaryAdminUpdateDuty() {
     } catch (err) {
       setErrorMsg('Failed to fetch user details');
     } finally {
-      setQrScanLoading(false);
+      // setQrScanLoading(false); // Removed as per edit hint
     }
   };
 
@@ -961,8 +958,6 @@ function SuperAdminUpdateDuty() {
   const [attendance, setAttendance] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
   const [updating, setUpdating] = React.useState(false);
-  // Add state for QR scan
-  const [qrScanLoading, setQrScanLoading] = React.useState(false);
 
   React.useEffect(() => {
     async function fetchUsers() {
@@ -1156,7 +1151,6 @@ function SuperAdminUpdateDuty() {
 
   const handleQrScan = async (scannedText) => {
     if (!scannedText) return;
-    setQrScanLoading(true);
     // Assume QR code contains the user profile link or just the user ID
     let userId = scannedText;
     // If QR code is a URL, extract the user ID
@@ -1210,7 +1204,7 @@ function SuperAdminUpdateDuty() {
     } catch (err) {
       message.error('Failed to fetch user details');
     } finally {
-      setQrScanLoading(false);
+      // setQrScanLoading(false); // Removed as per edit hint
     }
   };
 
