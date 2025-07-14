@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Button, Popconfirm, Modal, message, Avatar, Space, Layout, Menu, Form, Input, Row, Col, Typography, Tooltip, Dropdown } from 'antd';
-import { EditOutlined, DeleteOutlined, EyeOutlined, QrcodeOutlined, DownloadOutlined, MoreOutlined, UserOutlined, PhoneOutlined, MailOutlined, IdcardOutlined } from '@ant-design/icons';
+import { EditOutlined, DeleteOutlined, EyeOutlined, QrcodeOutlined, DownloadOutlined, MoreOutlined, UserOutlined } from '@ant-design/icons';
 import { logout } from '../utils/auth';
 import { useNavigate } from 'react-router-dom';
 import { uploadToCloudinary } from '../utils/cloudinary';
