@@ -54,7 +54,7 @@ router.get('/:id', authMiddleware, requireAnyRole(['super', 'secondary']), async
 // Update duty time (admin only, now attendance)
 router.put('/:id/duty', authMiddleware, requireAnyRole(['super', 'secondary']), async (req, res) => {
   try {
-    const { date, comingTime, finishingTime } = req.body;
+    const { date, comingTime, finishingTime, dutySchedule } = req.body;
     if (!date) return res.status(400).json({ message: 'Date is required' });
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: 'User not found' });
@@ -64,9 +64,10 @@ router.put('/:id/duty', authMiddleware, requireAnyRole(['super', 'secondary']), 
     if (att) {
       if (comingTime) att.comingTime = comingTime;
       if (finishingTime) att.finishingTime = finishingTime;
+      if (dutySchedule) att.dutySchedule = dutySchedule;
       updated = true;
     } else {
-      user.attendance.push({ date, comingTime: comingTime || '', finishingTime: finishingTime || '' });
+      user.attendance.push({ date, comingTime: comingTime || '', finishingTime: finishingTime || '', dutySchedule: dutySchedule || '' });
       updated = true;
     }
     await user.save();

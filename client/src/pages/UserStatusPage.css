@@ -1,0 +1,108 @@
+.user-status-bg {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+  padding: 0;
+  animation: fadeInBg 1.2s;
+}
+
+@keyframes fadeInBg {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.75) !important;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.10);
+  backdrop-filter: blur(8px);
+  border-radius: 20px !important;
+  border: 1px solid rgba(255,255,255,0.18) !important;
+  transition: box-shadow 0.3s;
+}
+.glass-card:hover {
+  box-shadow: 0 12px 32px 0 rgba(31, 38, 135, 0.18);
+}
+
+.user-profile-card {
+  margin-bottom: 32px;
+}
+
+.avatar-glow {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.avatar-glow .ant-avatar {
+  box-shadow: 0 0 0 4px #00cec855, 0 4px 24px #00cec822;
+  transition: box-shadow 0.3s;
+}
+.avatar-glow .ant-avatar:hover {
+  box-shadow: 0 0 0 8px #00cec899, 0 8px 32px #00cec844;
+}
+
+.glass-desc .ant-descriptions-item-label {
+  font-weight: 700;
+  color: #00b894;
+  background: rgba(0, 206, 200, 0.07);
+  border-radius: 8px 0 0 8px;
+}
+.glass-desc .ant-descriptions-item-content {
+  font-weight: 500;
+  color: #333;
+  background: rgba(255,255,255,0.5);
+  border-radius: 0 8px 8px 0;
+}
+
+.copy-link-box {
+  background: #f6ffed;
+  border: 1px solid #b7eb8f;
+  border-radius: 10px;
+  padding: 18px;
+  margin: 18px 0;
+  word-break: break-all;
+  display: inline-block;
+  font-size: 16px;
+  font-family: 'Fira Mono', 'Consolas', monospace;
+  box-shadow: 0 2px 8px #b7eb8f33;
+}
+
+.copy-link-btn {
+  background: linear-gradient(90deg, #00cec8 0%, #52c41a 100%) !important;
+  border: none !important;
+  color: #fff !important;
+  font-weight: 700;
+  font-size: 16px;
+  border-radius: 24px !important;
+  box-shadow: 0 2px 8px #00cec833;
+  margin-top: 8px;
+  transition: background 0.3s, box-shadow 0.3s;
+}
+.copy-link-btn:hover {
+  background: linear-gradient(90deg, #52c41a 0%, #00cec8 100%) !important;
+  box-shadow: 0 4px 16px #52c41a33;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.back-btn-glass {
+  background: rgba(255,255,255,0.7);
+  border-radius: 16px;
+  box-shadow: 0 2px 8px #00cec822;
+  padding: 8px 18px 8px 10px;
+  transition: box-shadow 0.2s, background 0.2s;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  font-weight: 600;
+  color: #00cec8;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.back-btn-glass:hover {
+  background: #e0fcf7;
+  box-shadow: 0 4px 16px #00cec844;
+  color: #00b894;
+} 

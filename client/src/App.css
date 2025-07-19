@@ -14,20 +14,204 @@
 }
 
 .App-header {
-  background-color: #282c34;
+  background: linear-gradient(135deg, #00cec8 0%, #006064 100%);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
-  color: white;
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(0, 131, 143, 0.3);
 }
 
 .App-link {
-  color: #61dafb;
+  color: #00cec8;
 }
 
+/* Primary Button Styling */
+button,
+.ant-btn-primary {
+  background: linear-gradient(135deg, #00cec8 0%, #006064 100%) !important;
+  border-color: #00cec8 !important;
+  color: #fff !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 8px rgba(0, 131, 143, 0.3) !important;
+  transition: all 0.3s ease !important;
+}
+
+button:hover,
+.ant-btn-primary:hover {
+  background: linear-gradient(135deg, #006064 0%, #004d52 100%) !important;
+  border-color: #006064 !important;
+  color: #fff !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(0, 131, 143, 0.4) !important;
+}
+
+/* Menu Styling */
+.ant-menu-item-selected,
+.ant-menu-item-active {
+  background: linear-gradient(135deg, #00cec8 0%, #006064 100%) !important;
+  color: #fff !important;
+  border-radius: 6px !important;
+  margin: 4px 8px !important;
+}
+
+.ant-menu-dark .ant-menu-item-selected {
+  background: linear-gradient(135deg, #00cec8 0%, #006064 100%) !important;
+  color: #fff !important;
+  border-radius: 6px !important;
+}
+
+.ant-menu-dark {
+  background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%) !important;
+}
+
+.ant-menu-dark .ant-menu-item {
+  color: #e0e6ed !important;
+  margin: 2px 8px !important;
+  border-radius: 6px !important;
+  transition: all 0.3s ease !important;
+}
+
+.ant-menu-dark .ant-menu-item:hover {
+  background: rgba(0, 131, 143, 0.2) !important;
+  color: #fff !important;
+}
+
+/* Card Styling */
+.ant-card {
+  border-radius: 12px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08) !important;
+  border: 1px solid rgba(0, 131, 143, 0.1) !important;
+  transition: all 0.3s ease !important;
+}
+
+.ant-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 131, 143, 0.15) !important;
+  transform: translateY(-2px) !important;
+}
+
+.ant-card-head {
+  background: linear-gradient(135deg, #f8fffe 0%, #ffffff 100%) !important;
+  border-bottom: 2px solid rgba(0, 131, 143, 0.1) !important;
+  border-radius: 12px 12px 0 0 !important;
+}
+
+.ant-card-head-title {
+  color: #1a1a2e !important;
+  font-weight: 600 !important;
+}
+
+/* Layout Styling */
+.ant-layout-sider {
+  background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%) !important;
+  box-shadow: 4px 0 16px rgba(0, 0, 0, 0.1) !important;
+}
+
+.ant-layout-header {
+  background: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+  border-bottom: 1px solid rgba(0, 131, 143, 0.1) !important;
+}
+
+.ant-layout-content {
+  background: linear-gradient(135deg, #f8fffe 0%, #ffffff 100%) !important;
+}
+
+/* Table Styling */
+.ant-table-thead > tr > th {
+  background: #00cec8 !important;
+  color: #fff !important;
+  font-weight: 700 !important;
+  font-size: 16px !important;
+  border-radius: 8px 8px 0 0 !important;
+  border-bottom: 2px solid #00b894 !important;
+  letter-spacing: 0.5px;
+}
+
+.ant-table-tbody > tr:nth-child(odd) > td {
+  background: #f0fdfc !important;
+}
+
+.ant-table-tbody > tr:nth-child(even) > td {
+  background: #fff !important;
+}
+
+.ant-table-tbody > tr:hover > td {
+  background: #e0f7fa !important;
+  color: #00b894 !important;
+  transition: background 0.2s, color 0.2s;
+}
+
+.ant-table-cell {
+  font-size: 15px !important;
+  padding: 12px 10px !important;
+  border-bottom: 1.5px solid #e0f7fa !important;
+}
+
+/* Input Styling */
+.ant-input,
+.ant-input-password,
+.ant-select-selector {
+  border-radius: 8px !important;
+  border: 2px solid rgba(0, 131, 143, 0.2) !important;
+  transition: all 0.3s ease !important;
+}
+
+.ant-input:focus,
+.ant-input-password:focus,
+.ant-select-focused .ant-select-selector {
+  border-color: #00cec8 !important;
+  box-shadow: 0 0 0 2px rgba(0, 131, 143, 0.2) !important;
+}
+
+/* Remove inner border from Ant Design password input to avoid double line */
+.ant-input-affix-wrapper.ant-input-password .ant-input {
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+/* Statistics Styling */
+.ant-statistic-title {
+  color: #1a1a2e !important;
+  font-weight: 500 !important;
+}
+
+.ant-statistic-content {
+  color: #00cec8 !important;
+  font-weight: 700 !important;
+}
+
+/* Alert Styling */
+.ant-alert-success {
+  background: linear-gradient(135deg, #e8f5e8 0%, #f0f9f0 100%) !important;
+  border: 1px solid #52c41a !important;
+  border-radius: 8px !important;
+}
+
+.ant-alert-error {
+  background: linear-gradient(135deg, #fff2f0 0%, #fff7f6 100%) !important;
+  border: 1px solid #ff4d4f !important;
+  border-radius: 8px !important;
+}
+
+/* Custom gradient backgrounds */
+.gradient-primary {
+  background: linear-gradient(135deg, #00cec8 0%, #006064 100%);
+}
+
+.gradient-secondary {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+}
+
+.gradient-light {
+  background: linear-gradient(135deg, #f8fffe 0%, #ffffff 100%);
+}
+
+/* Animation */
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
@@ -35,4 +219,108 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* Custom shadows */
+.shadow-soft {
+  box-shadow: 0 4px 16px rgba(0, 131, 143, 0.1);
+}
+
+.shadow-medium {
+  box-shadow: 0 8px 24px rgba(0, 131, 143, 0.15);
+}
+
+.shadow-strong {
+  box-shadow: 0 12px 32px rgba(0, 131, 143, 0.2);
+}
+
+/* Responsive design helpers */
+@media (max-width: 768px) {
+  .ant-card {
+    margin: 8px !important;
+  }
+
+  .ant-layout-content {
+    padding: 12px !important;
+  }
+}
+
+/* Custom Date Picker Header Button Styles */
+.ant-picker-header {
+  background: #e0f7fa !important;
+  border-radius: 10px 10px 0 0 !important;
+  padding: 8px 0 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ant-picker-header button {
+  background: #00cec8 !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 6px !important;
+  margin: 0 4px !important;
+  padding: 4px 10px !important;
+  font-weight: 600 !important;
+  transition: background 0.2s;
+}
+
+.ant-picker-header button:hover {
+  background: #009e6e !important;
+  color: #fff !important;
+}
+
+.ant-picker-header-view button {
+  background: #fff !important;
+  color: #00cec8 !important;
+  border: 1px solid #00cec8 !important;
+  border-radius: 6px !important;
+  margin: 0 2px !important;
+  font-weight: 700 !important;
+}
+
+.ant-picker-header-view button:hover {
+  background: #00cec8 !important;
+  color: #fff !important;
+}
+
+/* Custom Date Picker Day Cell Styles */
+.ant-picker-cell-inner {
+  border-radius: 6px !important;
+  font-weight: 600 !important;
+  transition: background 0.2s, color 0.2s;
+}
+
+.ant-picker-cell-selected .ant-picker-cell-inner,
+.ant-picker-cell-range-start .ant-picker-cell-inner,
+.ant-picker-cell-range-end .ant-picker-cell-inner {
+  background: #00cec8 !important;
+  color: #fff !important;
+}
+
+.ant-picker-cell-in-view.ant-picker-cell-today .ant-picker-cell-inner {
+  border: 2px solid #00cec8 !important;
+  background: #e0f7fa !important;
+  color: #00cec8 !important;
+}
+
+.ant-picker-cell-inner:hover {
+  background: #00b894 !important;
+  color: #fff !important;
 }

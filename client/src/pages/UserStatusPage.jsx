@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Card, Spin, Typography, Avatar, Row, Col, Descriptions, Alert, List, Tag, Button, Divider, message } from 'antd';
 import { TrophyTwoTone, CrownTwoTone, SmileTwoTone, ClockCircleOutlined, LockOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
+import './UserStatusPage.css';
 
 const { Title, Paragraph, Text } = Typography;
 
 export default function UserStatusPage() {
   const { userId } = useParams();
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [topLeaders, setTopLeaders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -144,136 +146,143 @@ export default function UserStatusPage() {
   ];
 
   return (
-    <Row justify="center" style={{ marginTop: 40, marginBottom: 40 }}>
-      <Col xs={24} md={20} lg={16}>
-        {/* User Profile Card */}
-        <Card bordered={false} style={{ borderRadius: 16, boxShadow: '0 2px 12px #e6f7ff', marginBottom: 24 }}>
-          <div style={{ textAlign: 'center', marginBottom: 24 }}>
-            <Avatar src={user.profilePic} size={96} style={{ marginBottom: 16 }} />
-            <Title level={3}>{user.name}</Title>
-            {userIsTopLeader && (
-              <div style={{ marginBottom: 16, textAlign: 'center', fontWeight: 600, fontSize: 18, color: '#52c41a' }}>
-                <SmileTwoTone twoToneColor="#52c41a" style={{ fontSize: 28, marginRight: 8 }} />
-                🏆 Congratulations! You are the top leader!
+    <div className="user-status-bg">
+      <Row justify="center" style={{ marginTop: 40, marginBottom: 40 }}>
+        <Col xs={24} md={20} lg={16}>
+          {/* Back Button */}
+          <div style={{ marginBottom: 24, display: 'flex', alignItems: 'center' }}>
+            <button
+              className="back-btn-glass"
+              onClick={() => navigate('/')}
+              style={{ display: 'flex', alignItems: 'center', gap: 8, border: 'none', background: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 16 }}
+            >
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#00cec8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+              <span style={{ color: '#00cec8' }}>Back</span>
+            </button>
+          </div>
+          {/* User Profile Card */}
+          <Card bordered={false} className="glass-card user-profile-card" style={{ marginBottom: 24 }}>
+            <div style={{ textAlign: 'center', marginBottom: 24 }}>
+              <div className="avatar-glow">
+                <Avatar src={user.profilePic} size={110} style={{ marginBottom: 16, border: '4px solid #fff' }} />
+              </div>
+              <Title level={2} style={{ fontWeight: 800, letterSpacing: 1 }}>{user.name}</Title>
+              {userIsTopLeader && (
+                <div style={{ marginBottom: 16, textAlign: 'center', fontWeight: 700, fontSize: 20, color: '#52c41a', animation: 'fadeIn 1s' }}>
+                  <SmileTwoTone twoToneColor="#52c41a" style={{ fontSize: 32, marginRight: 8 }} />
+                  🏆 Congratulations! You are the top leader!
+                </div>
+              )}
+              <div style={{ marginBottom: 16 }}>
+                <Tag color={workingStatus.color} style={{ fontSize: 16, padding: '6px 18px', borderRadius: 20, background: '#f0fdfc', color: '#00cec8', fontWeight: 600, boxShadow: '0 2px 8px #00cec833' }}>
+                  <ClockCircleOutlined style={{ marginRight: 8 }} />
+                  {workingStatus.status}
+                  {isActive && <span style={{ marginLeft: 8 }}>⏱️ Live</span>}
+                </Tag>
+              </div>
+              <Paragraph style={{ fontSize: 20, margin: 0, fontWeight: 600 }}>
+                Total Duty Time: <b style={{ color: '#00cec8' }}>{formatDutyTime(totalDutyTime)}</b>
+                {isActive && <span style={{ color: '#52c41a', fontSize: 16, marginLeft: 10 }}>↻ Live</span>}
+              </Paragraph>
+            </div>
+            <Descriptions column={1} bordered size="middle" className="glass-desc">
+              <Descriptions.Item label="ID">{user._id}</Descriptions.Item>
+              <Descriptions.Item label="Email">{user.email}</Descriptions.Item>
+              <Descriptions.Item label="Phone Number">{user.phoneNumber}</Descriptions.Item>
+              <Descriptions.Item label="NIC">{user.nic}</Descriptions.Item>
+              <Descriptions.Item label="Date of Birth">{user.dateOfBirth ? new Date(user.dateOfBirth).toLocaleDateString() : '-'}</Descriptions.Item>
+              <Descriptions.Item label="Age">{user.age || '-'}</Descriptions.Item>
+              <Descriptions.Item label="School">{user.school || '-'}</Descriptions.Item>
+              <Descriptions.Item label="Registration Time">{new Date(user.registrationTime).toLocaleString()}</Descriptions.Item>
+            </Descriptions>
+          </Card>
+          {/* Top 3 Leaders Card */}
+          <Card 
+            title={
+              <span style={{ fontWeight: 700, fontSize: 20 }}>
+                <SmileTwoTone twoToneColor="#52c41a" style={{ marginRight: 8 }} />
+                Top 3 Leadership Services
+              </span>
+            } 
+            bordered={false} 
+            className="glass-card"
+          >
+            {topLeaders.length > 0 ? (
+              <List
+                itemLayout="horizontal"
+                dataSource={topLeaders}
+                renderItem={(leader, idx) => (
+                  <List.Item style={{ borderRadius: 12, margin: '8px 0', background: idx === 0 ? 'linear-gradient(90deg, #e0ffe7 0%, #f0fdfc 100%)' : '#fff', boxShadow: idx === 0 ? '0 2px 12px #b2f7ef' : 'none' }}>
+                    <List.Item.Meta
+                      avatar={
+                        <span>
+                          {idx < 3 ? trophyIcons[idx] : <TrophyTwoTone twoToneColor="#1677ff" style={{ fontSize: 18 }} />}
+                          <Avatar src={leader.profilePic} style={{ marginLeft: 6, border: idx === 0 ? '2px solid #52c41a' : 'none' }} />
+                        </span>
+                      }
+                      title={
+                        <span style={{ fontWeight: 600 }}>
+                          {leader.name} 
+                          <span style={{ color: '#888', fontSize: 12, marginLeft: 8 }}>({leader._id})</span>
+                          {leader._id === userId && (
+                            <Tag color="green" style={{ marginLeft: 8 }}>You</Tag>
+                          )}
+                        </span>
+                      }
+                      description={
+                        <span>
+                          Duty Time: <b>{formatDutyTime(calculateTotalDutyTime(leader.attendance, leader._id))}</b>
+                          {idx === 0 && (
+                            <span style={{ marginLeft: 12, color: '#52c41a' }}>
+                              🏆 Outstanding Service!
+                            </span>
+                          )}
+                        </span>
+                      }
+                    />
+                  </List.Item>
+                )}
+              />
+            ) : (
+              <div style={{ textAlign: 'center', color: '#888', padding: 20 }}>
+                <SmileTwoTone twoToneColor="#52c41a" style={{ fontSize: 48, marginBottom: 16 }} />
+                <p>No leadership data available</p>
               </div>
             )}
-            <div style={{ marginBottom: 16 }}>
-              <Tag color={workingStatus.color} style={{ fontSize: 14, padding: '4px 12px' }}>
-                <ClockCircleOutlined style={{ marginRight: 6 }} />
-                {workingStatus.status}
-                {isActive && <span style={{ marginLeft: 6 }}>⏱️ Live</span>}
-              </Tag>
+          </Card>
+          {/* Alternative Access Method */}
+          <Divider orientation="left" style={{ fontWeight: 700, fontSize: 18, color: '#00cec8' }}>Alternative Access Method</Divider>
+          <Card bordered={false} className="glass-card">
+            <div style={{ textAlign: 'center' }}>
+              <LockOutlined style={{ fontSize: 28, color: '#00cec8', marginBottom: 8 }} />
+              <Title level={4} style={{ color: '#00cec8', fontWeight: 700 }}>Can't Scan QR Code?</Title>
+              <Paragraph>
+                Use this direct link to access your status page:
+              </Paragraph>
+              <div className="copy-link-box">
+                <Text code style={{ fontSize: 16 }}>
+                  {`${window.location.origin}/user/${user._id}`}
+                </Text>
+              </div>
+              <Button 
+                type="primary" 
+                size="large"
+                className="copy-link-btn"
+                onClick={() => {
+                  navigator.clipboard.writeText(`${window.location.origin}/user/${user._id}`);
+                  message.success('Link copied to clipboard!');
+                }}
+                icon={<LockOutlined />}
+              >
+                Copy Link
+              </Button>
+              <Paragraph type="secondary" style={{ marginTop: 16, fontSize: 13 }}>
+                Simply share this link with anyone who needs to view your status page.
+              </Paragraph>
             </div>
-            <Paragraph style={{ fontSize: 18, margin: 0 }}>
-              Total Duty Time: <b style={{ color: '#1677ff' }}>{formatDutyTime(totalDutyTime)}</b>
-              {isActive && <span style={{ color: '#52c41a', fontSize: 14, marginLeft: 8 }}>↻ Live</span>}
-            </Paragraph>
-          </div>
-          <Descriptions column={1} bordered size="middle">
-            <Descriptions.Item label="ID">{user._id}</Descriptions.Item>
-            <Descriptions.Item label="Email">{user.email}</Descriptions.Item>
-            <Descriptions.Item label="Phone Number">{user.phoneNumber}</Descriptions.Item>
-            <Descriptions.Item label="NIC">{user.nic}</Descriptions.Item>
-            <Descriptions.Item label="Date of Birth">{user.dateOfBirth ? new Date(user.dateOfBirth).toLocaleDateString() : '-'}</Descriptions.Item>
-            <Descriptions.Item label="Age">{user.age || '-'}</Descriptions.Item>
-            <Descriptions.Item label="School">{user.school || '-'}</Descriptions.Item>
-            <Descriptions.Item label="Registration Time">{new Date(user.registrationTime).toLocaleString()}</Descriptions.Item>
-          </Descriptions>
-        </Card>
-
-        {/* Top 3 Leaders Card */}
-        <Card 
-          title={
-            <span>
-              <SmileTwoTone twoToneColor="#52c41a" style={{ marginRight: 8 }} />
-              Top 3 Leadership Services
-            </span>
-          } 
-          bordered={false} 
-          style={{ borderRadius: 16, boxShadow: '0 2px 12px #e6f7ff' }}
-        >
-          {topLeaders.length > 0 ? (
-            <List
-              itemLayout="horizontal"
-              dataSource={topLeaders}
-              renderItem={(leader, idx) => (
-                <List.Item>
-                  <List.Item.Meta
-                    avatar={
-                      <span>
-                        {idx < 3 ? trophyIcons[idx] : <TrophyTwoTone twoToneColor="#1677ff" style={{ fontSize: 18 }} />}
-                        <Avatar src={leader.profilePic} style={{ marginLeft: 6 }} />
-                      </span>
-                    }
-                    title={
-                      <span>
-                        {leader.name} 
-                        <span style={{ color: '#888', fontSize: 12, marginLeft: 8 }}>({leader._id})</span>
-                        {leader._id === userId && (
-                          <Tag color="green" style={{ marginLeft: 8 }}>You</Tag>
-                        )}
-                      </span>
-                    }
-                    description={
-                      <span>
-                        Duty Time: <b>{formatDutyTime(calculateTotalDutyTime(leader.attendance, leader._id))}</b>
-                        {idx === 0 && (
-                          <span style={{ marginLeft: 12, color: '#52c41a' }}>
-                            🏆 Outstanding Service!
-                          </span>
-                        )}
-                      </span>
-                    }
-                  />
-                </List.Item>
-              )}
-            />
-          ) : (
-            <div style={{ textAlign: 'center', color: '#888', padding: 20 }}>
-              <SmileTwoTone twoToneColor="#52c41a" style={{ fontSize: 48, marginBottom: 16 }} />
-              <p>No leadership data available</p>
-            </div>
-          )}
-        </Card>
-
-        {/* Alternative Access Method */}
-        <Divider orientation="left">Alternative Access Method</Divider>
-        <Card bordered={false} style={{ borderRadius: 16, boxShadow: '0 2px 12px #e6f7ff' }}>
-          <div style={{ textAlign: 'center' }}>
-            <LockOutlined style={{ fontSize: 24, color: '#1890ff', marginBottom: 8 }} />
-            <Title level={4}>Can't Scan QR Code?</Title>
-            <Paragraph>
-              Use this direct link to access your status page:
-            </Paragraph>
-            <div style={{ 
-              background: '#f6ffed', 
-              border: '1px solid #b7eb8f', 
-              borderRadius: 8, 
-              padding: 16, 
-              margin: '16px 0',
-              wordBreak: 'break-all'
-            }}>
-              <Text code style={{ fontSize: 14 }}>
-                {`${window.location.origin}/user/${user._id}`}
-              </Text>
-            </div>
-            <Button 
-              type="primary" 
-              size="large"
-              onClick={() => {
-                navigator.clipboard.writeText(`${window.location.origin}/user/${user._id}`);
-                message.success('Link copied to clipboard!');
-              }}
-              icon={<LockOutlined />}
-            >
-              Copy Link
-            </Button>
-            <Paragraph type="secondary" style={{ marginTop: 16, fontSize: 12 }}>
-              Simply share this link with anyone who needs to view your status page.
-            </Paragraph>
-          </div>
-        </Card>
-      </Col>
-    </Row>
+          </Card>
+        </Col>
+      </Row>
+    </div>
   );
 } 

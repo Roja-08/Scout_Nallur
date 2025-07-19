@@ -19,7 +19,8 @@ const UserSchema = new mongoose.Schema({
     {
       date: { type: String }, // e.g., '2024-06-30'
       comingTime: { type: String }, // e.g., '08:30'
-      finishingTime: { type: String } // e.g., '17:00'
+      finishingTime: { type: String }, // e.g., '17:00'
+      dutySchedule: { type: String } // e.g., 'Morning', 'Evening', etc.
     }
   ]
 });

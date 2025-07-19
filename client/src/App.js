@@ -11,6 +11,67 @@ import UserStatusPage from './pages/UserStatusPage';
 import ViewAllUsers from './pages/ViewAllUsers';
 import { TrophyTwoTone, CrownTwoTone, SmileTwoTone, LikeTwoTone, DownloadOutlined, QrcodeOutlined, EyeOutlined, UserOutlined } from '@ant-design/icons';
 import QrScanner from 'react-qr-scanner';
+import "../src/index.css"
+import "../src/App.css"
+
+export default function App() {
+  return (
+    <ConfigProvider theme={{ token: { colorPrimary: '#1677ff' } }}>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/admin" element={<Login />} />
+          <Route path="/dashboard/super" element={
+            <PrivateRoute role="super">
+              <SuperAdminDashboard />
+            </PrivateRoute>
+          } />
+          <Route path="/dashboard/super/add-user" element={
+            <PrivateRoute role="super">
+              <AddUserPage />
+            </PrivateRoute>
+          } />
+          <Route path="/dashboard/super/view-all-users" element={
+            <PrivateRoute role="super">
+              <ViewAllUsers />
+            </PrivateRoute>
+          } />
+          <Route path="/dashboard/super/update-duty" element={
+            <PrivateRoute role="super">
+              <SuperAdminUpdateDuty />
+            </PrivateRoute>
+          } />
+          <Route path="/dashboard/super/attendance-history" element={
+            <PrivateRoute role="super">
+              <AttendanceHistory />
+            </PrivateRoute>
+          } />
+          <Route path="/dashboard/secondary" element={
+            <PrivateRoute role="secondary">
+              <SecondaryAdminDashboard />
+            </PrivateRoute>
+          } />
+          <Route path="/dashboard/secondary/view-users" element={
+            <PrivateRoute role="secondary">
+              <SecondaryAdminViewUsers />
+            </PrivateRoute>
+          } />
+          <Route path="/dashboard/secondary/update-duty" element={
+            <PrivateRoute role="secondary">
+              <SecondaryAdminUpdateDuty />
+            </PrivateRoute>
+          } />
+          <Route path="/dashboard/secondary/attendance-history" element={
+            <PrivateRoute role="secondary">
+              <AttendanceHistory />
+            </PrivateRoute>
+          } />
+          <Route path="/user/:userId" element={<UserStatusPage />} />
+        </Routes>
+      </Router>
+    </ConfigProvider>
+  );
+}
 
 dayjs.extend(customParseFormat);
 
@@ -111,7 +172,11 @@ function SuperAdminDashboard() {
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider breakpoint="lg" collapsedWidth="0">
-        <div style={{ color: '#fff', fontWeight: 700, fontSize: 22, padding: 24 }}>Scout</div>
+        <img
+          src={process.env.PUBLIC_URL + '/IMG-20230930-WA0000-removebg-preview.png'}
+          alt="Scout Logo"
+          style={{ width: 100, height: 100, objectFit: 'contain', display: 'block', margin: '24px auto', padding: 0 }}
+        />
         <Menu
           theme="dark"
           mode="inline"
@@ -137,7 +202,7 @@ function SuperAdminDashboard() {
           <div>
             <b>{email}</b> <span style={{ color: '#1677ff', marginLeft: 8 }}>[super]</span>
           </div>
-          <Button type="primary" danger onClick={logout}>Logout</Button>
+          <Button type="primary" danger style={{ background: '#ff4d4f', borderColor: '#ff4d4f' }} onClick={logout}>Logout</Button>
         </Header>
         <Content style={{ margin: 24, background: '#fff', borderRadius: 8, minHeight: 400, padding: 24 }}>
           <Row gutter={[24, 24]}>
@@ -160,15 +225,15 @@ function SuperAdminDashboard() {
           <Row gutter={[24, 24]} style={{ marginTop: 32 }}>
             <Col xs={24} md={16}>
               <Card title="Leaderboard: Most Duty Time" bordered={false} style={{ borderRadius: 12 }}>
-                {topUsers.length > 0 && (
+                {users.length > 0 && (
                   <div style={{ marginBottom: 16, textAlign: 'center', fontWeight: 600, fontSize: 18 }}>
                     <SmileTwoTone twoToneColor="#52c41a" style={{ fontSize: 28, marginRight: 8 }} />
-                    Congrats <span style={{ color: '#1677ff' }}>{topUsers[0].name}</span> for your outstanding service!
+                    Congrats <span style={{ color: '#1677ff' }}>{users[0].name}</span> for your outstanding service!
                   </div>
                 )}
                 <List
                   itemLayout="horizontal"
-                  dataSource={topUsers}
+                  dataSource={users.sort((a, b) => calculateLiveDutyTime(b) - calculateLiveDutyTime(a))}
                   renderItem={(user, idx) => (
                     <List.Item>
                       <List.Item.Meta
@@ -185,10 +250,48 @@ function SuperAdminDashboard() {
             </Col>
             <Col xs={24} md={8}>
               <Card title="Quick Actions" bordered={false} style={{ borderRadius: 12, marginBottom: 24 }}>
-                <ul style={{ paddingLeft: 20 }}>
-                  <li><button type="button" style={{ background: 'none', border: 'none', color: '#1677ff', cursor: 'pointer', padding: 0, textDecoration: 'underline' }} onClick={() => navigate('/dashboard/super/view-all-users')}>View All Users</button></li>
-                  <li><button type="button" style={{ background: 'none', border: 'none', color: '#1677ff', cursor: 'pointer', padding: 0, textDecoration: 'underline' }} onClick={() => navigate('/dashboard/super/add-user')}>Add New User</button></li>
-                </ul>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'stretch' }}>
+                  <button
+                    type="button"
+                    style={{
+                      background: '#00b894',
+                      border: 'none',
+                      color: '#fff',
+                      cursor: 'pointer',
+                      padding: '12px 0',
+                      borderRadius: 8,
+                      fontWeight: 600,
+                      fontSize: 16,
+                      boxShadow: '0 2px 8px #00b89433',
+                      transition: 'background 0.2s',
+                    }}
+                    onMouseOver={e => (e.currentTarget.style.background = '#009e6e')}
+                    onMouseOut={e => (e.currentTarget.style.background = '#00b894')}
+                    onClick={() => navigate('/dashboard/super/view-all-users')}
+                  >
+                    View All Users
+                  </button>
+                  <button
+                    type="button"
+                    style={{
+                      background: '#00b894',
+                      border: 'none',
+                      color: '#fff',
+                      cursor: 'pointer',
+                      padding: '12px 0',
+                      borderRadius: 8,
+                      fontWeight: 600,
+                      fontSize: 16,
+                      boxShadow: '0 2px 8px #00b89433',
+                      transition: 'background 0.2s',
+                    }}
+                    onMouseOver={e => (e.currentTarget.style.background = '#009e6e')}
+                    onMouseOut={e => (e.currentTarget.style.background = '#00b894')}
+                    onClick={() => navigate('/dashboard/super/add-user')}
+                  >
+                    Add New User
+                  </button>
+                </div>
               </Card>
               <Card title="Recent Activities" bordered={false} style={{ borderRadius: 12 }}>
                 <ul style={{ paddingLeft: 20 }}>
@@ -197,6 +300,9 @@ function SuperAdminDashboard() {
                   <li>User 686e9b849ad9 deleted by Super Admin</li>
                 </ul>
               </Card>
+              <div style={{ textAlign: 'center', marginTop: 16 }}>
+                <img src={process.env.PUBLIC_URL + '/banner.jpeg'} alt="Festival Banner" style={{ maxWidth: 500, width: '100%', height: 'auto', borderRadius: 16, boxShadow: '0 4px 24px #00cec833', marginBottom: 24 }} />
+              </div>
             </Col>
           </Row>
         </Content>
@@ -283,7 +389,11 @@ function SecondaryAdminDashboard() {
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider breakpoint="lg" collapsedWidth="0">
-        <div style={{ color: '#fff', fontWeight: 700, fontSize: 22, padding: 24 }}>Scout</div>
+        <img
+          src={process.env.PUBLIC_URL + '/IMG-20230930-WA0000-removebg-preview.png'}
+          alt="Scout Logo"
+          style={{ width: 100, height: 100, objectFit: 'contain', display: 'block', margin: '24px auto', padding: 0 }}
+        />
         <Menu
           theme="dark"
           mode="inline"
@@ -307,7 +417,7 @@ function SecondaryAdminDashboard() {
           <div>
             <b>{email}</b> <span style={{ color: '#1677ff', marginLeft: 8 }}>[secondary]</span>
           </div>
-          <Button type="primary" danger onClick={logout}>Logout</Button>
+          <Button type="primary" danger style={{ background: '#ff4d4f', borderColor: '#ff4d4f' }} onClick={logout}>Logout</Button>
         </Header>
         <Content style={{ margin: 24, background: '#fff', borderRadius: 8, minHeight: 400, padding: 24 }}>
           <Row gutter={[24, 24]}>
@@ -355,10 +465,48 @@ function SecondaryAdminDashboard() {
             </Col>
             <Col xs={24} md={8}>
               <Card title="Quick Actions" bordered={false} style={{ borderRadius: 12, marginBottom: 24 }}>
-                <ul style={{ paddingLeft: 20 }}>
-                  <li><button type="button" style={{ background: 'none', border: 'none', color: '#1677ff', cursor: 'pointer', padding: 0, textDecoration: 'underline' }} onClick={() => navigate('/dashboard/secondary/view-users')}>View Users</button></li>
-                  <li><button type="button" style={{ background: 'none', border: 'none', color: '#1677ff', cursor: 'pointer', padding: 0, textDecoration: 'underline' }} onClick={() => navigate('/dashboard/secondary/update-duty')}>Update Duty Times</button></li>
-                </ul>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'stretch' }}>
+                  <button
+                    type="button"
+                    style={{
+                      background: '#00b894',
+                      border: 'none',
+                      color: '#fff',
+                      cursor: 'pointer',
+                      padding: '12px 0',
+                      borderRadius: 8,
+                      fontWeight: 600,
+                      fontSize: 16,
+                      boxShadow: '0 2px 8px #00b89433',
+                      transition: 'background 0.2s',
+                    }}
+                    onMouseOver={e => (e.currentTarget.style.background = '#009e6e')}
+                    onMouseOut={e => (e.currentTarget.style.background = '#00b894')}
+                    onClick={() => navigate('/dashboard/secondary/view-users')}
+                  >
+                    View Users
+                  </button>
+                  <button
+                    type="button"
+                    style={{
+                      background: '#00b894',
+                      border: 'none',
+                      color: '#fff',
+                      cursor: 'pointer',
+                      padding: '12px 0',
+                      borderRadius: 8,
+                      fontWeight: 600,
+                      fontSize: 16,
+                      boxShadow: '0 2px 8px #00b89433',
+                      transition: 'background 0.2s',
+                    }}
+                    onMouseOver={e => (e.currentTarget.style.background = '#009e6e')}
+                    onMouseOut={e => (e.currentTarget.style.background = '#00b894')}
+                    onClick={() => navigate('/dashboard/secondary/update-duty')}
+                  >
+                    Update Duty Times
+                  </button>
+                </div>
               </Card>
               <Card title="Recent Activities" bordered={false} style={{ borderRadius: 12 }}>
                 <ul style={{ paddingLeft: 20 }}>
@@ -488,7 +636,11 @@ function SecondaryAdminViewUsers() {
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider breakpoint="lg" collapsedWidth="0">
-        <div style={{ color: '#fff', fontWeight: 700, fontSize: 22, padding: 24 }}>Scout</div>
+        <img
+          src={process.env.PUBLIC_URL + '/IMG-20230930-WA0000-removebg-preview.png'}
+          alt="Scout Logo"
+          style={{ width: 100, height: 100, objectFit: 'contain', display: 'block', margin: '24px auto', padding: 0 }}
+        />
         <Menu
           theme="dark"
           mode="inline"
@@ -512,14 +664,15 @@ function SecondaryAdminViewUsers() {
           <div>
             <b>{email}</b> <span style={{ color: '#1677ff', marginLeft: 8 }}>[secondary]</span>
           </div>
-          <Button type="primary" danger onClick={logout}>Logout</Button>
+          <Button type="primary" danger style={{ background: '#ff4d4f', borderColor: '#ff4d4f' }} onClick={logout}>Logout</Button>
         </Header>
         <Content style={{ margin: 24, background: '#fff', borderRadius: 8, minHeight: 400, padding: 24 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
             <h2>View Users</h2>
             <Button 
               type="primary" 
-              icon={<DownloadOutlined />}
+              icon={<DownloadOutlined />} 
+              style={{ background: '#00b894', borderColor: '#00b894', fontWeight: 600 }}
               onClick={() => {
                 const csvContent = [
                   ['User ID', 'Name', 'Email', 'Phone Number', 'NIC', 'Profile Picture URL'],
@@ -543,6 +696,7 @@ function SecondaryAdminViewUsers() {
                 link.click();
                 document.body.removeChild(link);
               }}
+              className="rounded-lg px-6 py-2 text-base shadow-soft hover:bg-green-700 transition"
             >
               Export to CSV
             </Button>
@@ -567,7 +721,11 @@ function AddUserPage() {
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider breakpoint="lg" collapsedWidth="0">
-        <div style={{ color: '#fff', fontWeight: 700, fontSize: 22, padding: 24 }}>Scout</div>
+        <img
+          src={process.env.PUBLIC_URL + '/IMG-20230930-WA0000-removebg-preview.png'}
+          alt="Scout Logo"
+          style={{ width: 100, height: 100, objectFit: 'contain', display: 'block', margin: '24px auto', padding: 0 }}
+        />
         <Menu
           theme="dark"
           mode="inline"
@@ -593,7 +751,7 @@ function AddUserPage() {
           <div>
             <b>{email}</b> <span style={{ color: '#1677ff', marginLeft: 8 }}>[super]</span>
           </div>
-          <Button type="primary" danger onClick={logout}>Logout</Button>
+          <Button type="primary" danger style={{ background: '#ff4d4f', borderColor: '#ff4d4f' }} onClick={logout}>Logout</Button>
         </Header>
         <Content style={{ margin: 24, background: '#fff', borderRadius: 8, minHeight: 400, padding: 24 }}>
           <h2>Add New User</h2>
@@ -671,6 +829,7 @@ function SecondaryAdminUpdateDuty() {
   const [date, setDate] = React.useState(dayjs().format('YYYY-MM-DD'));
   const [attendance, setAttendance] = React.useState([]);
   const [showScanner, setShowScanner] = React.useState(false);
+  const [dutySchedule, setDutySchedule] = React.useState('');
 
   React.useEffect(() => {
     async function fetchUsers() {
@@ -737,7 +896,7 @@ function SecondaryAdminUpdateDuty() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({ date, comingTime }),
+        body: JSON.stringify({ date, comingTime, dutySchedule }),
       });
       const data = await res.json();
       if (res.ok) {
@@ -786,7 +945,7 @@ function SecondaryAdminUpdateDuty() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({ date, finishingTime }),
+        body: JSON.stringify({ date, finishingTime, dutySchedule }),
       });
       const data = await res.json();
       if (res.ok) {
@@ -861,7 +1020,7 @@ function SecondaryAdminUpdateDuty() {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${token}`,
             },
-            body: JSON.stringify({ date: today, comingTime: now }),
+            body: JSON.stringify({ date: today, comingTime: now, dutySchedule }),
           });
           setComingTime(now);
           setSuccessMsg('Coming time updated automatically!');
@@ -875,7 +1034,7 @@ function SecondaryAdminUpdateDuty() {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${token}`,
             },
-            body: JSON.stringify({ date: today, finishingTime: now }),
+            body: JSON.stringify({ date: today, finishingTime: now, dutySchedule }),
           });
           setFinishingTime(now);
           setSuccessMsg('Finishing time updated automatically!');
@@ -897,7 +1056,11 @@ function SecondaryAdminUpdateDuty() {
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider breakpoint="lg" collapsedWidth="0">
-        <div style={{ color: '#fff', fontWeight: 700, fontSize: 22, padding: 24 }}>Scout</div>
+        <img
+          src={process.env.PUBLIC_URL + '/IMG-20230930-WA0000-removebg-preview.png'}
+          alt="Scout Logo"
+          style={{ width: 100, height: 100, objectFit: 'contain', display: 'block', margin: '24px auto', padding: 0 }}
+        />
         <Menu
           theme="dark"
           mode="inline"
@@ -921,7 +1084,7 @@ function SecondaryAdminUpdateDuty() {
           <div>
             <b>{email}</b> <span style={{ color: '#1677ff', marginLeft: 8 }}>[secondary]</span>
           </div>
-          <Button type="primary" danger onClick={logout}>Logout</Button>
+          <Button type="primary" danger style={{ background: '#ff4d4f', borderColor: '#ff4d4f' }} onClick={logout}>Logout</Button>
         </Header>
         <Content style={{ margin: 24, background: '#fff', borderRadius: 8, minHeight: 400, padding: 24 }}>
           <h2>Update Duty Times</h2>
@@ -968,6 +1131,34 @@ function SecondaryAdminUpdateDuty() {
             )}
             {errorMsg && <div style={{ color: 'red', marginBottom: 12 }}>{errorMsg}</div>}
             {successMsg && <div style={{ color: 'green', marginBottom: 12 }}>{successMsg}</div>}
+            <Form.Item label="Duty Schedule">
+              <Select
+                value={dutySchedule}
+                onChange={value => {
+                  setDutySchedule(value);
+                  if (value === 'Early Morning') {
+                    setComingTime('04:30');
+                    setFinishingTime('07:30');
+                  } else if (value === 'Morning') {
+                    setComingTime('08:00');
+                    setFinishingTime('11:00');
+                  } else if (value === 'Evening') {
+                    setComingTime('15:30');
+                    setFinishingTime('19:30');
+                  } else {
+                    setComingTime('');
+                    setFinishingTime('');
+                  }
+                }}
+                placeholder="Select a schedule"
+                style={{ width: '100%' }}
+                allowClear
+              >
+                <Select.Option value="Early Morning">Early Morning (4:30 AM – 7:30 AM)</Select.Option>
+                <Select.Option value="Morning">Morning (8:00 AM – 11:00 AM)</Select.Option>
+                <Select.Option value="Evening">Evening (3:30 PM – 7:30 PM)</Select.Option>
+              </Select>
+            </Form.Item>
           </form>
           
           {/* Selected User Attendance Records */}
@@ -1003,6 +1194,7 @@ function SuperAdminUpdateDuty() {
   const [loading, setLoading] = React.useState(false);
   const [updating, setUpdating] = React.useState(false);
   const [showScanner, setShowScanner] = React.useState(false);
+  const [dutySchedule, setDutySchedule] = React.useState('');
 
   React.useEffect(() => {
     async function fetchUsers() {
@@ -1097,7 +1289,7 @@ function SuperAdminUpdateDuty() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({ date, comingTime }),
+        body: JSON.stringify({ date, comingTime, dutySchedule }),
       });
       const data = await res.json();
       if (res.ok) {
@@ -1164,7 +1356,7 @@ function SuperAdminUpdateDuty() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({ date, finishingTime }),
+        body: JSON.stringify({ date, finishingTime, dutySchedule }),
       });
       const data = await res.json();
       if (res.ok) {
@@ -1225,7 +1417,7 @@ function SuperAdminUpdateDuty() {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${token}`,
             },
-            body: JSON.stringify({ date: today, comingTime: now }),
+            body: JSON.stringify({ date: today, comingTime: now, dutySchedule }),
           });
           setComingTime(now);
           message.success('Coming time updated automatically!');
@@ -1239,7 +1431,7 @@ function SuperAdminUpdateDuty() {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${token}`,
             },
-            body: JSON.stringify({ date: today, finishingTime: now }),
+            body: JSON.stringify({ date: today, finishingTime: now, dutySchedule }),
           });
           setFinishingTime(now);
           message.success('Finishing time updated automatically!');
@@ -1261,7 +1453,11 @@ function SuperAdminUpdateDuty() {
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider breakpoint="lg" collapsedWidth="0">
-        <div style={{ color: '#fff', fontWeight: 700, fontSize: 22, padding: 24 }}>Scout</div>
+        <img
+          src={process.env.PUBLIC_URL + '/IMG-20230930-WA0000-removebg-preview.png'}
+          alt="Scout Logo"
+          style={{ width: 100, height: 100, objectFit: 'contain', display: 'block', margin: '24px auto', padding: 0 }}
+        />
         <Menu
           theme="dark"
           mode="inline"
@@ -1287,7 +1483,7 @@ function SuperAdminUpdateDuty() {
           <div>
             <b>{email}</b> <span style={{ color: '#1677ff', marginLeft: 8 }}>[super]</span>
           </div>
-          <Button type="primary" danger onClick={logout}>Logout</Button>
+          <Button type="primary" danger style={{ background: '#ff4d4f', borderColor: '#ff4d4f' }} onClick={logout}>Logout</Button>
         </Header>
         <Content style={{ margin: { xs: 12, md: 24 }, background: '#fff', borderRadius: 8, minHeight: 400, padding: { xs: 16, md: 24 } }}>
           <Title level={2} style={{ marginBottom: 24 }}>Update Duty Times</Title>
@@ -1399,6 +1595,34 @@ function SuperAdminUpdateDuty() {
                   style={{ marginBottom: 16 }}
                 />
               )}
+              <Form.Item label="Duty Schedule">
+                <Select
+                  value={dutySchedule}
+                  onChange={value => {
+                    setDutySchedule(value);
+                    if (value === 'Early Morning') {
+                      setComingTime('04:30');
+                      setFinishingTime('07:30');
+                    } else if (value === 'Morning') {
+                      setComingTime('08:00');
+                      setFinishingTime('11:00');
+                    } else if (value === 'Evening') {
+                      setComingTime('15:30');
+                      setFinishingTime('19:30');
+                    } else {
+                      setComingTime('');
+                      setFinishingTime('');
+                    }
+                  }}
+                  placeholder="Select a schedule"
+                  style={{ width: '100%' }}
+                  allowClear
+                >
+                  <Select.Option value="Early Morning">Early Morning (4:30 AM – 7:30 AM)</Select.Option>
+                  <Select.Option value="Morning">Morning (8:00 AM – 11:00 AM)</Select.Option>
+                  <Select.Option value="Evening">Evening (3:30 PM – 7:30 PM)</Select.Option>
+                </Select>
+              </Form.Item>
             </Form>
           </Card>
           
@@ -1440,6 +1664,7 @@ function AttendanceHistory() {
   const [historyFilterDate, setHistoryFilterDate] = React.useState('');
   const [allAttendanceHistory, setAllAttendanceHistory] = React.useState([]);
   const [selectedUserFilter, setSelectedUserFilter] = React.useState('');
+  const [dutyScheduleFilter, setDutyScheduleFilter] = React.useState('');
 
   React.useEffect(() => {
     async function fetchUsers() {
@@ -1478,8 +1703,21 @@ function AttendanceHistory() {
     { title: 'Date', dataIndex: 'date', key: 'date' },
     { title: 'Coming Time', dataIndex: 'comingTime', key: 'comingTime' },
     { title: 'Finishing Time', dataIndex: 'finishingTime', key: 'finishingTime' },
-    { 
-      title: 'Duty Time', 
+    {
+      title: 'Duty Schedule',
+      dataIndex: 'dutySchedule',
+      key: 'dutySchedule',
+      render: (_, record) => {
+        if (record.dutySchedule) return record.dutySchedule;
+        // Infer from times if not present
+        if (record.comingTime === '04:30' && record.finishingTime === '07:30') return 'Early Morning';
+        if (record.comingTime === '08:00' && record.finishingTime === '11:00') return 'Morning';
+        if (record.comingTime === '15:30' && record.finishingTime === '19:30') return 'Evening';
+        return 'Custom';
+      }
+    },
+    {
+      title: 'Duty Time',
       key: 'dutyTime',
       render: (_, record) => {
         if (record.comingTime && record.finishingTime) {
@@ -1501,7 +1739,15 @@ function AttendanceHistory() {
   const filteredHistory = allAttendanceHistory.filter(record => {
     const dateMatch = !historyFilterDate || record.date === historyFilterDate;
     const userMatch = !selectedUserFilter || record.userId === selectedUserFilter;
-    return dateMatch && userMatch;
+    let schedule = record.dutySchedule;
+    if (!schedule) {
+      if (record.comingTime === '04:30' && record.finishingTime === '07:30') schedule = 'Early Morning';
+      else if (record.comingTime === '08:00' && record.finishingTime === '11:00') schedule = 'Morning';
+      else if (record.comingTime === '15:30' && record.finishingTime === '19:30') schedule = 'Evening';
+      else schedule = 'Custom';
+    }
+    const scheduleMatch = !dutyScheduleFilter || schedule === dutyScheduleFilter;
+    return dateMatch && userMatch && scheduleMatch;
   });
 
   const isSuperAdmin = getAdminRole() === 'super';
@@ -1509,7 +1755,11 @@ function AttendanceHistory() {
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider breakpoint="lg" collapsedWidth="0">
-        <div style={{ color: '#fff', fontWeight: 700, fontSize: 22, padding: 24 }}>Scout</div>
+        <img
+          src={process.env.PUBLIC_URL + '/IMG-20230930-WA0000-removebg-preview.png'}
+          alt="Scout Logo"
+          style={{ width: 100, height: 100, objectFit: 'contain', display: 'block', margin: '24px auto', padding: 0 }}
+        />
         <Menu
           theme="dark"
           mode="inline"
@@ -1547,7 +1797,7 @@ function AttendanceHistory() {
           <div>
             <b>{email}</b> <span style={{ color: '#1677ff', marginLeft: 8 }}>[{isSuperAdmin ? 'super' : 'secondary'}]</span>
           </div>
-          <Button type="primary" danger onClick={logout}>Logout</Button>
+          <Button type="primary" danger style={{ background: '#ff4d4f', borderColor: '#ff4d4f' }} onClick={logout}>Logout</Button>
         </Header>
         <Content style={{ margin: 24, background: '#fff', borderRadius: 8, minHeight: 400, padding: 24 }}>
           <h2>All Users Attendance History</h2>
@@ -1578,10 +1828,26 @@ function AttendanceHistory() {
               </select>
             </div>
             
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <label style={{ fontWeight: 500 }}>Filter by Duty Schedule:</label>
+              <select 
+                value={dutyScheduleFilter} 
+                onChange={e => setDutyScheduleFilter(e.target.value)}
+                style={{ width: 200, padding: 8, borderRadius: 4, border: '1px solid #d9d9d9' }}
+              >
+                <option value="">All Schedules</option>
+                <option value="Early Morning">Early Morning</option>
+                <option value="Morning">Morning</option>
+                <option value="Evening">Evening</option>
+                <option value="Custom">Custom</option>
+              </select>
+            </div>
+            
             <Button 
               onClick={() => {
                 setHistoryFilterDate('');
                 setSelectedUserFilter('');
+                setDutyScheduleFilter('');
               }} 
               style={{ marginLeft: 8 }}
             >
@@ -1622,7 +1888,8 @@ function AttendanceHistory() {
             
             <Button 
               type="primary" 
-              icon={<DownloadOutlined />}
+              icon={<DownloadOutlined />} 
+              style={{ background: '#00b894', borderColor: '#00b894', fontWeight: 600 }}
               onClick={() => {
                 const csvContent = [
                   ['User ID', 'Name', 'Date', 'Coming Time', 'Finishing Time', 'Duty Time (Hours)', 'Duty Time (Minutes)'],
@@ -1660,6 +1927,7 @@ function AttendanceHistory() {
                 link.click();
                 document.body.removeChild(link);
               }}
+              className="rounded-lg px-6 py-2 text-base shadow-soft hover:bg-green-700 transition"
             >
               Export to CSV
             </Button>
@@ -1696,64 +1964,3 @@ function PrivateRoute({ children, role }) {
   }
   return children;
 }
-
-function App() {
-  return (
-    <ConfigProvider theme={{ token: { colorPrimary: '#1677ff' } }}>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/admin" element={<Login />} />
-          <Route path="/dashboard/super" element={
-            <PrivateRoute role="super">
-              <SuperAdminDashboard />
-            </PrivateRoute>
-          } />
-          <Route path="/dashboard/super/add-user" element={
-            <PrivateRoute role="super">
-              <AddUserPage />
-            </PrivateRoute>
-          } />
-          <Route path="/dashboard/super/view-all-users" element={
-            <PrivateRoute role="super">
-              <ViewAllUsers />
-            </PrivateRoute>
-          } />
-          <Route path="/dashboard/super/update-duty" element={
-            <PrivateRoute role="super">
-              <SuperAdminUpdateDuty />
-            </PrivateRoute>
-          } />
-          <Route path="/dashboard/super/attendance-history" element={
-            <PrivateRoute role="super">
-              <AttendanceHistory />
-            </PrivateRoute>
-          } />
-          <Route path="/dashboard/secondary" element={
-            <PrivateRoute role="secondary">
-              <SecondaryAdminDashboard />
-            </PrivateRoute>
-          } />
-          <Route path="/dashboard/secondary/view-users" element={
-            <PrivateRoute role="secondary">
-              <SecondaryAdminViewUsers />
-            </PrivateRoute>
-          } />
-          <Route path="/dashboard/secondary/update-duty" element={
-            <PrivateRoute role="secondary">
-              <SecondaryAdminUpdateDuty />
-            </PrivateRoute>
-          } />
-          <Route path="/dashboard/secondary/attendance-history" element={
-            <PrivateRoute role="secondary">
-              <AttendanceHistory />
-            </PrivateRoute>
-          } />
-          <Route path="/user/:userId" element={<UserStatusPage />} />
-        </Routes>
-      </Router>
-    </ConfigProvider>
-  );
-}
-
-export default App;

@@ -68,7 +68,9 @@ export default function ViewAllUsers() {
       name: user.name || '',
       email: user.email || '',
       phoneNumber: user.phoneNumber || '',
-      nic: user.nic || ''
+      nic: user.nic || '',
+      school: user.school || '',
+      age: user.age || ''
     });
   };
 
@@ -189,6 +191,20 @@ export default function ViewAllUsers() {
       render: (nic) => <Text code>{nic}</Text>
     },
     { 
+      title: 'School',
+      dataIndex: 'school',
+      key: 'school',
+      responsive: ['lg'],
+      render: (school) => <Text>{school}</Text>
+    },
+    {
+      title: 'Age',
+      dataIndex: 'age',
+      key: 'age',
+      responsive: ['lg'],
+      render: (age) => <Text>{age}</Text>
+    },
+    { 
       title: 'Profile', 
       dataIndex: 'profilePic', 
       key: 'profilePic',
@@ -200,91 +216,59 @@ export default function ViewAllUsers() {
       key: 'actions',
       fixed: 'right',
       width: 120,
-      render: (_, user) => {
-        const actionItems = [
-          {
-            key: 'view',
-            label: 'View Profile',
-            icon: <EyeOutlined />, 
-            onClick: () => window.open(`${process.env.REACT_APP_API_URL || ''}/user/${user._id}`, '_blank')
-          },
-          {
-            key: 'edit',
-            label: 'Edit User',
-            icon: <EditOutlined />, 
-            onClick: () => handleEdit(user)
-          },
-          {
-            key: 'resend',
-            label: 'Resend QR Code',
-            icon: <QrcodeOutlined />, 
-            onClick: () => handleResendQR(user._id, user.name)
-          },
-          {
-            key: 'delete',
-            label: 'Delete User',
-            icon: <DeleteOutlined />, 
-            danger: true,
-            onClick: () => handleDelete(user._id)
-          }
-        ];
-
-        return (
-          <Space wrap>
-            {/* Desktop buttons */}
-            <div style={{ display: { xs: 'none', md: 'flex' }, gap: 4 }}>
-              <Tooltip title="View Profile">
-                <Button 
-                  icon={<EyeOutlined />} 
-                  size="small"
-                  onClick={() => window.open(`${process.env.REACT_APP_API_URL || ''}/user/${user._id}`, '_blank')}
-                />
-              </Tooltip>
-              <Tooltip title="Edit User">
-                <Button 
-                  icon={<EditOutlined />} 
-                  size="small"
-                  onClick={() => handleEdit(user)}
-                />
-              </Tooltip>
-              <Tooltip title="Resend QR Code">
-                <Button 
-                  icon={<QrcodeOutlined />} 
-                  size="small"
-                  onClick={() => handleResendQR(user._id, user.name)}
-                />
-              </Tooltip>
-              <Popconfirm 
-                title="Delete user?" 
-                description="This action cannot be undone."
-                onConfirm={() => handleDelete(user._id)} 
-                okText="Yes" 
-                cancelText="No"
-                okType="danger"
-              >
-                <Button icon={<DeleteOutlined />} danger size="small" />
-              </Popconfirm>
-            </div>
-            {/* Mobile dropdown */}
-            <div style={{ display: { xs: 'block', md: 'none' } }}>
-              <Dropdown
-                menu={{ items: actionItems }}
-                trigger={['click']}
-                placement="bottomRight"
-              >
-                <Button icon={<MoreOutlined />} size="small" />
-              </Dropdown>
-            </div>
-          </Space>
-        );
-      },
+      render: (_, user) => (
+        <Space wrap>
+          <Tooltip title="View Profile">
+            <Button
+              shape="circle"
+              icon={<EyeOutlined style={{ color: '#fff', fontSize: 20 }} />}
+              style={{ background: '#00cec8', border: 'none', marginRight: 4, boxShadow: '0 2px 8px #00cec833' }}
+              onClick={() => window.open(`${process.env.PUBLIC_URL || ''}/user/${user._id}`, '_blank')}
+            />
+          </Tooltip>
+          <Tooltip title="Edit User">
+            <Button
+              shape="circle"
+              icon={<EditOutlined style={{ color: '#fff', fontSize: 20 }} />}
+              style={{ background: '#00cec8', border: 'none', marginRight: 4, boxShadow: '0 2px 8px #00cec833' }}
+              onClick={() => handleEdit(user)}
+            />
+          </Tooltip>
+          <Tooltip title="Resend QR Code">
+            <Button
+              shape="circle"
+              icon={<QrcodeOutlined style={{ color: '#fff', fontSize: 20 }} />}
+              style={{ background: '#1677ff', border: 'none', marginRight: 4, boxShadow: '0 2px 8px #1677ff33' }}
+              onClick={() => handleResendQR(user._id, user.name)}
+            />
+          </Tooltip>
+          <Popconfirm
+            title="Delete user?"
+            description="This action cannot be undone."
+            onConfirm={() => handleDelete(user._id)}
+            okText="Yes"
+            cancelText="No"
+            okType="danger"
+          >
+            <Button
+              shape="circle"
+              icon={<DeleteOutlined style={{ color: '#fff', fontSize: 20 }} />}
+              style={{ background: '#ff4d4f', border: 'none', boxShadow: '0 2px 8px #ff4d4f33' }}
+            />
+          </Popconfirm>
+        </Space>
+      ),
     },
   ];
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider breakpoint="lg" collapsedWidth="0">
-        <div style={{ color: '#fff', fontWeight: 700, fontSize: 22, padding: 24 }}>Scout</div>
+        <img
+          src={process.env.PUBLIC_URL + '/IMG-20230930-WA0000-removebg-preview.png'}
+          alt="Scout Logo"
+          style={{ width: 100, height: 100, objectFit: 'contain', display: 'block', margin: '24px auto', padding: 0 }}
+        />
         <Menu
           theme="dark"
           mode="inline"
@@ -310,7 +294,7 @@ export default function ViewAllUsers() {
           <div>
             <b>{email}</b> <span style={{ color: '#1677ff', marginLeft: 8 }}>[super]</span>
           </div>
-          <Button type="primary" danger onClick={logout}>Logout</Button>
+          <Button type="primary" danger style={{ background: '#ff4d4f', borderColor: '#ff4d4f' }} onClick={logout}>Logout</Button>
         </Header>
         <Content style={{ margin: { xs: 12, md: 24 }, background: '#fff', borderRadius: 8, minHeight: 400, padding: { xs: 16, md: 24 } }}>
           <Row justify="space-between" align="middle" style={{ marginBottom: 16 }}>
@@ -320,7 +304,8 @@ export default function ViewAllUsers() {
             <Col>
               <Button 
                 type="primary" 
-                icon={<DownloadOutlined />}
+                icon={<DownloadOutlined />} 
+                style={{ background: '#00b894', borderColor: '#00b894', fontWeight: 600 }}
                 onClick={() => {
                   const csvContent = [
                     ['User ID', 'Name', 'Email', 'Phone Number', 'NIC', 'Profile Picture URL'],
@@ -344,6 +329,7 @@ export default function ViewAllUsers() {
                   link.click();
                   document.body.removeChild(link);
                 }}
+                className="rounded-lg px-6 py-2 text-base shadow-soft hover:bg-green-700 transition"
               >
                 Export to CSV
               </Button>
@@ -426,6 +412,27 @@ export default function ViewAllUsers() {
                     rules={[{ required: true, message: 'Please enter NIC' }]}
                   >
                     <Input placeholder="Enter NIC" />
+                  </Form.Item>
+                </Col>
+              </Row>
+              
+              <Row gutter={16}>
+                <Col xs={24} md={12}>
+                  <Form.Item
+                    label="School"
+                    name="school"
+                    rules={[{ required: false }]}
+                  >
+                    <Input placeholder="Enter school" />
+                  </Form.Item>
+                </Col>
+                <Col xs={24} md={12}>
+                  <Form.Item
+                    label="Age"
+                    name="age"
+                    rules={[{ required: false, type: 'number', min: 1, max: 120, message: 'Please enter a valid age' }]}
+                  >
+                    <Input type="number" placeholder="Enter age" />
                   </Form.Item>
                 </Col>
               </Row>
